@@ -23,7 +23,7 @@ namespace ShineSharp.Champions
             combo = new Menu("Combo", "Combo");
             combo.AddItem(new MenuItem("CUSEQ", "Use Q").SetValue(true));
             combo.AddItem(new MenuItem("CUSEW", "Use W").SetValue(true));
-            combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(false));
+            //combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(false));
             combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(2, 2, 5)));
 
             harass = new Menu("Harass", "Harass");
@@ -31,13 +31,12 @@ namespace ShineSharp.Champions
             harass.AddItem(new MenuItem("HUSEW", "Use W").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
-            laneclear = new Menu("LaneClear", "LaneClear");
-            laneclear.AddItem(new MenuItem("LUSEW", "Use W").SetValue(true));
-            laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
+            //laneclear = new Menu("LaneClear", "LaneClear");
+            //laneclear.AddItem(new MenuItem("LUSEW", "Use W").SetValue(true));
+            //laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
             misc = new Menu("Misc", "Misc");
             misc.AddItem(new MenuItem("MAUTOQ", "Auto Harass Q").SetValue(true));
-            misc.AddItem(new MenuItem("MUSER", "Use R If Killable").SetValue(true));
             m_evader = new Evader(out evade, EvadeMethods.MorganaE);
 
             Config.AddSubMenu(combo);
@@ -81,7 +80,6 @@ namespace ShineSharp.Champions
                     CastSkillshot(t, Spells[Q]);
             }
             #endregion
-
         }
 
         public void Combo()
@@ -158,5 +156,6 @@ namespace ShineSharp.Champions
         }
     }
 }
+    
 
 
