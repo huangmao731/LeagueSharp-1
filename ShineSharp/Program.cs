@@ -27,14 +27,15 @@ namespace ShineSharp
         {
             switch (ObjectManager.Player.ChampionName.ToLowerInvariant())
             {
-                case "ezreal":
-                    Champion = new Ezreal();
-                    break;
-                case "morgana":
-                    Champion = new Morgana();
-                    break;
-                default:
-                    return;
+             case "ezreal":
+                     Champion = new Ezreal();
+                     break;
+                 case "morgana":
+                     Champion = new Morgana();
+                     break;
+                case "blitzcrank":
+                     Champion = new Blitzcrank();
+                     break;
             }
 
             Champion.CreateConfigMenu();
