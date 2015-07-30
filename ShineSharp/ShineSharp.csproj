@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Morgana.cs" />
     <Compile Include="ShineCommon\Activator.cs" />
     <Compile Include="ShineCommon\BaseChamp.cs" />
     <Compile Include="Champions\Ezreal.cs" />

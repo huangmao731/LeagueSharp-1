@@ -98,26 +98,26 @@ namespace ShineCommon
                         float mulspeeddelay = t.MoveSpeed * s.Delay;
                         if (dist_waypoint - dist_target > mulspeeddelay) //running away from me
                         {
-                            dist_target -= mulspeeddelay;
-                            dist_target -= (dist_target - mulspeeddelay) / s.Speed * t.MoveSpeed;
-                            if (s.Type == SkillshotType.SkillshotCircle)
-                                dist_target += s.Width;
-                        }
-
-
-                        if (t.IsValidTarget(dist_target))
-                        {
                             //s.Cast(s.GetPrediction(t).CastPosition);
                             if (t.Path.Length >= 2 && s.Type != SkillshotType.SkillshotCircle && s.Speed != 0)
                             {
-                                var direction = (t.Path[t.Path.Length - 1] - t.Path[0]).Normalized();
-                                s.Cast(p.CastPosition + direction * t.MoveSpeed * (s.Delay + dist_target / s.Speed - Game.Ping / 2));
+                                s.Cast(Geometry.PositionAfter(t.Path, (int)(s.Delay + dist_target / s.Speed), (int)t.MoveSpeed));
+                                //var direction = (t.Path[1] - t.Path[0]).Normalized();
+                                //s.Cast(p.CastPosition + direction * t.MoveSpeed * (s.Delay + dist_target / s.Speed));
                                 Console.WriteLine("new method");
                             }
                             else s.Cast(s.GetPrediction(t).CastPosition);
                             Console.WriteLine("away cast");
                             return;
+
+                            //dist_target -= mulspeeddelay;
+
+                            //dist_target -= (dist_target - mulspeeddelay) / s.Speed * t.MoveSpeed;
+                            //if (s.Type == SkillshotType.SkillshotCircle)
+                            //    dist_target += s.Width;
                         }
+
+
 
                         if (dist_waypoint < dist_target) //coming closer to me
                         {
@@ -148,6 +148,7 @@ namespace ShineCommon
                 }
             }
         }
+
 
         public bool ComboReady()
         {

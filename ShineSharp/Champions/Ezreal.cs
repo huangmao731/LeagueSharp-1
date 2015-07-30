@@ -172,7 +172,7 @@ namespace ShineSharp.Champions
 
             if (Spells[W].IsReady() && Config.Item("HUSEW").GetValue<bool>())
             {
-                var target = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
+                var target = TargetSelector.GetTarget(Spells[W].Range, TargetSelector.DamageType.Magical);
                 if (target != null)
                     CastSkillshot(target, Spells[W]);
             }
