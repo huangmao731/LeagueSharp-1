@@ -98,12 +98,13 @@ namespace ShineSharp.Champions
                     CastSkillshot(t, Spells[W]);
             }
 
-            if (Spells[R].IsReady())
-            {
                 if (Spells[R].IsReady())
+                {
                     if (ObjectManager.Player.CountEnemiesInRange(Spells[R].Range - 40) > 2)
+                    {
                         Spells[R].Cast();
-            }
+                    }
+                }
         }
 
         public void Harass()
