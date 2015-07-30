@@ -6,18 +6,21 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
+using ShineCommon;
+using Geometry = ShineCommon.Maths.Geometry;
 using SharpDX;
 
 
-namespace ShineSharp.Champions
+namespace ShineCommon
 {
     public class BaseChamp
     {
         public const int Q = 0, W = 1, E = 2, R = 3;
 
-        public Menu Config, combo, harass, laneclear, misc, drawing;
+        public Menu Config, combo, harass, laneclear, misc, drawing, evade;
         public Orbwalking.Orbwalker Orbwalker;
         public Spell[] Spells = new Spell[4];
+        public Evader m_evader;
 
         public delegate void dVoidDelegate();
         public dVoidDelegate BeforeOrbWalking;
@@ -28,12 +31,14 @@ namespace ShineSharp.Champions
             Config = new Menu(szChampName, szChampName, true);
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+            SpellDatabase.InitalizeSpellDatabase();
         }
 
         public virtual void CreateConfigMenu()
         {
             //
         }
+
         public virtual void SetSpells()
         {
             //
@@ -76,42 +81,70 @@ namespace ShineSharp.Champions
                 for (int i = 0; i < p.CollisionObjects.Count; i++)
                     if (!p.CollisionObjects[i].IsDead && (p.CollisionObjects[i].IsEnemy || p.CollisionObjects[i].IsMinion))
                         return;
-                    
+
             }
 
             if ((t.HasBuffOfType(BuffType.Slow) && p.Hitchance >= HitChance.Medium) || p.Hitchance == HitChance.Immobile)
                 s.Cast(p.CastPosition);
             else
             {
-                if (s.Type != SkillshotType.SkillshotCone && t.IsMoving)
+                //TO DO: if iswindingup
+                if (s.Type != SkillshotType.SkillshotCone)
                 {
-                    float dist_waypoint = ObjectManager.Player.ServerPosition.Distance(t.GetWaypoints().Last().To3D());
-                    float dist_target = ObjectManager.Player.ServerPosition.Distance(t.Position);
-                    float mulspeeddelay = t.MoveSpeed * s.Delay;
-                    if (dist_waypoint - dist_target > mulspeeddelay) //running away from me
+                    if (t.IsMoving && !t.IsWindingUp)
                     {
-                        dist_target -= mulspeeddelay;
-                        dist_target -= (dist_target - mulspeeddelay) / s.Speed * t.MoveSpeed;
-                        if (s.Type == SkillshotType.SkillshotCircle)
-                            dist_target += s.Width;
-                    }
+                        float dist_waypoint = ObjectManager.Player.ServerPosition.Distance(t.GetWaypoints().Last().To3D());
+                        float dist_target = ObjectManager.Player.ServerPosition.Distance(t.ServerPosition);
+                        float mulspeeddelay = t.MoveSpeed * s.Delay;
+                        if (dist_waypoint - dist_target > mulspeeddelay) //running away from me
+                        {
+                            dist_target -= mulspeeddelay;
+                            dist_target -= (dist_target - mulspeeddelay) / s.Speed * t.MoveSpeed;
+                            if (s.Type == SkillshotType.SkillshotCircle)
+                                dist_target += s.Width;
+                        }
 
-                    if (t.IsValidTarget(dist_target))
-                    {
-                        s.Cast(s.GetPrediction(t).CastPosition);
-                        return;
-                    }
 
-                    if (dist_waypoint < dist_target) //coming closer to me
+                        if (t.IsValidTarget(dist_target))
+                        {
+                            //s.Cast(s.GetPrediction(t).CastPosition);
+                            if (t.Path.Length >= 2)
+                            {
+                                var direction = (t.Path[t.Path.Length - 1] - t.Path[0]).Normalized();
+                                s.Cast(p.CastPosition + direction * t.MoveSpeed * (s.Delay + dist_target / s.Speed - Game.Ping / 2));
+                                Console.WriteLine("new method");
+                            }
+                            else s.Cast(s.GetPrediction(t).CastPosition);
+                            Console.WriteLine("away cast");
+                            return;
+                        }
+
+                        if (dist_waypoint < dist_target) //coming closer to me
+                        {
+                            s.CastIfHitchanceEquals(t, HitChance.High);
+                            Console.WriteLine("closer cast");
+                            return;
+                        }
+                    }
+                    else if (t.IsWindingUp)
                     {
-                        s.CastIfHitchanceEquals(t, HitChance.High);
+                        if (t.Path.Length >= 2)
+                            s.Cast(t.Path[t.Path.Length / 2]);
+                        else if (t.Path.Length == 0)
+                            s.Cast(t.ServerPosition);
+                        else if (t.Path.Length == 1)
+                            s.Cast(t.Path[0]);
+                        Console.WriteLine("windingup cast");
                         return;
                     }
                 }
                 else
                 {
                     if (t.IsValidTarget(s.Range))
+                    {
                         s.Cast(p.CastPosition);
+                        Console.WriteLine("else cast");
+                    }
                 }
             }
         }

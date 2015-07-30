@@ -5,6 +5,7 @@ using System.Text;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using ShineCommon;
 using ShineSharp.Champions;
 
 namespace ShineSharp
@@ -40,7 +41,6 @@ namespace ShineSharp
             Drawing.OnDraw += Champion.Drawing_OnDraw;
             Orbwalking.AfterAttack += Champion.Orbwalking_AfterAttack;
             AntiGapcloser.OnEnemyGapcloser += Champion.AntiGapcloser_OnEnemyGapcloser;
-
 
             Notifications.AddNotification(String.Format("Shine# - {0} Loaded", ObjectManager.Player.ChampionName), 3000);
         }

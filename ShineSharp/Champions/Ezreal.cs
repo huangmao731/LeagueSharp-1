@@ -5,6 +5,7 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
+using ShineCommon;
 using SharpDX;
 
 namespace ShineSharp.Champions
@@ -23,7 +24,6 @@ namespace ShineSharp.Champions
             combo.AddItem(new MenuItem("CUSEQ", "Use Q").SetValue(true));
             combo.AddItem(new MenuItem("CUSEW", "Use W").SetValue(true));
             //combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(false));
-            combo.AddItem(new MenuItem("CUSER", "Use R If Killable With Combo").SetValue(true));
             combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(2, 2, 5)));
 
             harass = new Menu("Harass", "Harass");
@@ -40,9 +40,12 @@ namespace ShineSharp.Champions
             misc.AddItem(new MenuItem("MAUTOQ", "Auto Harass Q").SetValue(true));
             misc.AddItem(new MenuItem("MUSER", "Use R If Killable").SetValue(true));
 
+            m_evader = new Evader(out evade, EvadeMethods.EzrealE);
+
             Config.AddSubMenu(combo);
             Config.AddSubMenu(harass);
             Config.AddSubMenu(laneclear);
+            Config.AddSubMenu(evade);
             Config.AddSubMenu(misc);
             Config.AddToMainMenu();
 
@@ -61,10 +64,12 @@ namespace ShineSharp.Champions
             Spells[W] = new Spell(SpellSlot.W, 800);
             Spells[W].SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
 
-            Spells[E] = new Spell(SpellSlot.E);
+            Spells[E] = new Spell(SpellSlot.E, 475);
 
             Spells[R] = new Spell(SpellSlot.R, 2500);
             Spells[R].SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
+
+            m_evader.SetEvadeSpell(Spells[E]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -79,7 +84,6 @@ namespace ShineSharp.Champions
                 int percent = 10 - collCount > 7 ? 7 : collCount;
                 dmg = dmg / 10 * percent;
             }
-
             return dmg;
         }
 
@@ -101,7 +105,7 @@ namespace ShineSharp.Champions
             #endregion
 
             #region Auto Ult
-            if (Config.Item("MUSER").GetValue<bool>() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
+            if (Config.Item("MUSER").GetValue<bool>() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(600) == 0)
             {
                 var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Spells[R].Range) && CalculateDamageR(enemy) > enemy.Health orderby enemy.ServerPosition.Distance(ObjectManager.Player.ServerPosition) descending select enemy).FirstOrDefault();
                 if (t != null)
@@ -109,15 +113,12 @@ namespace ShineSharp.Champions
             }
             #endregion
         }
-
+        
         public void Combo()
         {
-            if (Config.Item("CUSER").GetValue<bool>() && ComboReady()) //combo kill
+            /*if (Config.Item("CUSER").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(600) == 0) //combo kill
             {
                 var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(1500) && CalculateComboDamage(enemy) >= enemy.Health orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(t == null);
-                Console.ForegroundColor = ConsoleColor.White;
                 if (t != null && !t.UnderTurret())
                 {
                     if (Spells[R].CastIfHitchanceEquals(t, HitChance.VeryHigh))
@@ -132,11 +133,8 @@ namespace ShineSharp.Champions
 
             if (Spells[E].IsReady() && Config.Item("CUSEE").GetValue<bool>()) //find best position
             {
-                /*
-                var t = TargetSelector.GetTarget(Spells[E].Range, TargetSelector.DamageType.Physical);
-                if (t != null)
-                    */
-            }
+                
+            }*/
 
             if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
             {
