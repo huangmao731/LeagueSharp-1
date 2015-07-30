@@ -30,9 +30,6 @@ namespace ShineSharp
                 case "ezreal":
                     Champion = new Ezreal();
                     break;
-                case "blitzcrank":
-                    Champion = new Blitzcrank();
-                    break;
                 case "morgana":
                     Champion = new Morgana();
                     break;
