@@ -45,6 +45,8 @@ namespace ShineSharp.Champions
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LastHit] += LastHit;
             BeforeOrbWalking += BeforeOrbwalk;
+
+            Obj_AI_Base.OnBuffAdd += Obj_AI_Base_OnBuffAdd;
         }
 
         public override void SetSpells()
@@ -174,6 +176,15 @@ namespace ShineSharp.Champions
             {
                 if (Spells[E].IsReady())
                     Spells[E].Cast();
+            }
+        }
+
+        private void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        {
+            if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun) && sender.IsChampion())
+            {
+                if (Spells[Q].IsReady())
+                    Spells[Q].Cast(sender.ServerPosition);
             }
         }
     }
