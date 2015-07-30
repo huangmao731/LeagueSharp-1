@@ -68,7 +68,6 @@ namespace ShineSharp.Champions
 
             Spells[R] = new Spell(SpellSlot.R, 2500);
             Spells[R].SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
-
             m_evader.SetEvadeSpell(Spells[E]);
         }
 
@@ -95,6 +94,7 @@ namespace ShineSharp.Champions
 
         public void BeforeOrbwalk()
         {
+            
             #region Auto Harass
             if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
             {

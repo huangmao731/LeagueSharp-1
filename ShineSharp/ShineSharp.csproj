@@ -7,8 +7,8 @@
     <ProjectGuid>{355136A6-1291-4D69-8EDF-709F9A8A2B0B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Ezreal</RootNamespace>
-    <AssemblyName>Ezreal</AssemblyName>
+    <RootNamespace>ShineSharp</RootNamespace>
+    <AssemblyName>ShineSharp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PreBuildEvent />

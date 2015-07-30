@@ -108,7 +108,7 @@ namespace ShineCommon
                         if (t.IsValidTarget(dist_target))
                         {
                             //s.Cast(s.GetPrediction(t).CastPosition);
-                            if (t.Path.Length >= 2)
+                            if (t.Path.Length >= 2 && s.Type != SkillshotType.SkillshotCircle && s.Speed != 0)
                             {
                                 var direction = (t.Path[t.Path.Length - 1] - t.Path[0]).Normalized();
                                 s.Cast(p.CastPosition + direction * t.MoveSpeed * (s.Delay + dist_target / s.Speed - Game.Ping / 2));
