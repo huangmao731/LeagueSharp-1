@@ -30,6 +30,9 @@ namespace ShineSharp
                 case "ezreal":
                     Champion = new Ezreal();
                     break;
+                case "morgana":
+                    Champion = new Morgana();
+                    break;
                 default:
                     return;
             }
