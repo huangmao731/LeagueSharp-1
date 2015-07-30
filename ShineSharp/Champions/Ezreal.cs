@@ -94,7 +94,6 @@ namespace ShineSharp.Champions
 
         public void BeforeOrbwalk()
         {
-            
             #region Auto Harass
             if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
             {
@@ -116,26 +115,6 @@ namespace ShineSharp.Champions
         
         public void Combo()
         {
-            /*if (Config.Item("CUSER").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(600) == 0) //combo kill
-            {
-                var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(1500) && CalculateComboDamage(enemy) >= enemy.Health orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
-                if (t != null && !t.UnderTurret())
-                {
-                    if (Spells[R].CastIfHitchanceEquals(t, HitChance.VeryHigh))
-                    {
-                        if (Config.Item("CUSEE").GetValue<bool>()) Spells[E].Cast(t);
-                        if (Config.Item("CUSEQ").GetValue<bool>())  Spells[Q].Cast(t);
-                        if (Config.Item("CUSEW").GetValue<bool>())  Spells[W].Cast(t);
-                        return;
-                    }
-                }
-            }
-
-            if (Spells[E].IsReady() && Config.Item("CUSEE").GetValue<bool>()) //find best position
-            {
-                
-            }*/
-
             if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Physical);

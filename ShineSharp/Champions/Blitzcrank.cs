@@ -8,7 +8,7 @@ namespace ShineSharp.Champions
     public class Blitzcrank : BaseChamp
     {
         public Blitzcrank()
-            : base("Shine# Blitzcrank!")
+            : base("Blitzcrank")
         {
         }
 
@@ -17,16 +17,18 @@ namespace ShineSharp.Champions
             combo = new Menu("Combo", "Combo");
             combo.AddItem(new MenuItem("CUSEQ", "Use Q").SetValue(true));
             combo.AddItem(new MenuItem("CUSEW", "Use W").SetValue(true));
-            combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(false));
-            combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(1, 1, 5)));
+            combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(true));
+            combo.AddItem(new MenuItem("CUSERGRAB", "Use R If Grabbed").SetValue(true));
+            combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(2, 1, 5)));
 
             harass = new Menu("Harass", "Harass");
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
             laneclear = new Menu("LaneClear", "LaneClear");
-            //laneclear.AddItem(new MenuItem("LUSEQ", "Use Q").SetValue(true));
-            //laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
+            laneclear.AddItem(new MenuItem("LUSER", "Use R").SetValue(true));
+            laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
+
 
             misc = new Menu("Misc", "Misc");
             misc.AddItem(new MenuItem("MAUTOQ", "Auto Grab (Q)").SetValue(true));
@@ -43,7 +45,6 @@ namespace ShineSharp.Champions
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LastHit] += LastHit;
             BeforeOrbWalking += BeforeOrbwalk;
-            Obj_AI_Base.OnBuffAdd += Obj_AI_Base_OnBuffAdd;
         }
 
         public override void SetSpells()
@@ -51,7 +52,7 @@ namespace ShineSharp.Champions
             Spells[Q] = new Spell(SpellSlot.Q, 1000f);
             Spells[Q].SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.SkillshotLine);
             Spells[W] = new Spell(SpellSlot.W, 200);
-            Spells[E] = new Spell(SpellSlot.E, 475);
+            Spells[E] = new Spell(SpellSlot.E, 125);
             Spells[R] = new Spell(SpellSlot.R, 550f);
         }
 
@@ -75,30 +76,38 @@ namespace ShineSharp.Champions
 
         public void Combo()
         {
-            if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
+            bool chase = false;
+            if (Spells[R].IsReady() && Config.Item("CUSERGRAB").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
-                if (t != null)
-                    CastSkillshot(t, Spells[Q]);
-            }
-            if (Spells[W].IsReady() && Config.Item("CUSEW").GetValue<bool>())
-            {
-                Spells[W].Cast();
-            }
-            if (Spells[E].IsReady() && Config.Item("CUSEE").GetValue<bool>())
-            {
-                Spells[E].Cast();
-            }
-
-            if (Spells[R].IsReady())
-            {
-                var t =
-                    HeroManager.Enemies.Where(p => p.IsValidTarget(Spells[R].Range))
-                        .OrderBy(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition))
-                        .FirstOrDefault();
+                var t = HeroManager.Enemies.Where(p => p.IsValidTarget(Spells[R].Range + 100)).OrderBy(q => TargetSelector.GetPriority(q)).LastOrDefault();
                 if (t != null)
                 {
-                    Spells[R].CastIfWillHit(t, Config.Item("CUSERHIT").GetValue<Slider>().Value);
+                    chase = true;
+                    if(Spells[W].IsReady())
+                        Spells[W].Cast();
+                    if(ObjectManager.Player.ServerPosition.Distance(t.ServerPosition) <= Spells[R].Range - 10)
+                        Spells[R].Cast();
+                }
+            }
+            if (!chase)
+            {
+                if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
+                {
+                    var t = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
+                    if (t != null)
+                        CastSkillshot(t, Spells[Q]);
+                }
+                
+                if (Spells[R].IsReady())
+                {
+                    var t = HeroManager.Enemies.Where(p => p.IsValidTarget(Spells[R].Range)).OrderBy(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                    if (t != null)
+                    {
+                        if (t.HasBuffOfType(BuffType.Knockup) && t.IsValidTarget(Spells[R].Range) && Config.Item("CUSERGRAB").GetValue<bool>())
+                            Spells[R].Cast();
+                        else
+                            Spells[R].CastIfWillHit(t, Config.Item("CUSERHIT").GetValue<Slider>().Value);
+                    }
                 }
             }
         }
@@ -124,31 +133,47 @@ namespace ShineSharp.Champions
 
         public void LaneClear()
         {
+            if (ObjectManager.Player.ManaPercent < Config.Item("LMANA").GetValue<Slider>().Value)
+                return;
+
+            if (Spells[R].IsReady() && Config.Item("LUSER").GetValue<bool>())
+            {
+                var t =
+                    (from minion in
+                         MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy,
+                             MinionOrderTypes.MaxHealth)
+                     where
+                         minion.IsValidTarget(Spells[R].Range) && Spells[R].GetDamage(minion) >= minion.Health
+                     orderby minion.Health ascending
+                     select minion);
+                if (t != null && t.Count() >= 3)
+                    Spells[R].Cast(t.FirstOrDefault().ServerPosition);
+            }
         }
 
         public void LastHit()
         {
             //if (Spells[E].IsReady() && Config.Item("MLASTE").GetValue<bool>())
-            {
-                //var t =
-                //    (from minion in
-                //        MinionManager.GetMinions(Spells[E].Range, MinionTypes.All, MinionTeam.Enemy,
-                //            MinionOrderTypes.MaxHealth)
-                //        where
-                //            minion.IsValidTarget(Spells[E].Range) && Spells[E].GetDamage(minion) >= minion.Health &&
-                //            (!minion.UnderTurret() &&
-                //             minion.Distance(ObjectManager.Player.Position) > ObjectManager.Player.AttackRange)
-                //        orderby minion.Health ascending
-                //        select minion).FirstOrDefault();
-            }
+            //{
+            //    var t =
+            //        (from minion in
+            //             MinionManager.GetMinions(Spells[E].Range, MinionTypes.All, MinionTeam.Enemy,
+            //                 MinionOrderTypes.MaxHealth)
+            //         where
+            //             minion.IsValidTarget(Spells[E].Range) && Spells[E].GetDamage(minion) >= minion.Health &&
+            //             (!minion.UnderTurret() &&
+            //              minion.Distance(ObjectManager.Player.Position) > ObjectManager.Player.AttackRange)
+            //         orderby minion.Health ascending
+            //         select minion).FirstOrDefault();
+            //}
         }
 
-        private void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        public override void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun))
+            if (args.Unit.IsMe && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
-                if (Spells[Q].IsReady())
-                    Spells[Q].Cast(sender.ServerPosition);
+                if (Spells[E].IsReady())
+                    Spells[E].Cast();
             }
         }
     }

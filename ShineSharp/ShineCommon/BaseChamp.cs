@@ -28,7 +28,7 @@ namespace ShineCommon
 
         public BaseChamp(string szChampName)
         {
-            Config = new Menu(szChampName, szChampName, true);
+            Config = new Menu(String.Format("Shine# {0} !", szChampName), szChampName, true);
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             SpellDatabase.InitalizeSpellDatabase();
@@ -56,6 +56,11 @@ namespace ShineCommon
         }
 
         public virtual void Drawing_OnDraw(EventArgs args)
+        {
+            //
+        }
+
+        public virtual void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             //
         }
@@ -88,7 +93,6 @@ namespace ShineCommon
                 s.Cast(p.CastPosition);
             else
             {
-                //TO DO: if iswindingup
                 if (s.Type != SkillshotType.SkillshotCone)
                 {
                     if (t.IsMoving && !t.IsWindingUp)
@@ -104,10 +108,10 @@ namespace ShineCommon
                                 s.Cast(Geometry.PositionAfter(t.Path, (int)(s.Delay + dist_target / s.Speed), (int)t.MoveSpeed));
                                 //var direction = (t.Path[1] - t.Path[0]).Normalized();
                                 //s.Cast(p.CastPosition + direction * t.MoveSpeed * (s.Delay + dist_target / s.Speed));
-                                Console.WriteLine("new method");
+                                //Console.WriteLine("new method");
                             }
                             else s.Cast(s.GetPrediction(t).CastPosition);
-                            Console.WriteLine("away cast");
+                            //Console.WriteLine("away cast");
                             return;
 
                             //dist_target -= mulspeeddelay;

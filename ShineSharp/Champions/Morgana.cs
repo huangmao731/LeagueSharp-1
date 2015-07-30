@@ -31,10 +31,6 @@ namespace ShineSharp.Champions
             harass.AddItem(new MenuItem("HUSEW", "Use W").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
-            //laneclear = new Menu("LaneClear", "LaneClear");
-            //laneclear.AddItem(new MenuItem("LUSEW", "Use W").SetValue(true));
-            //laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
-
             misc = new Menu("Misc", "Misc");
             misc.AddItem(new MenuItem("MAUTOQ", "Auto Harass Q").SetValue(true));
             m_evader = new Evader(out evade, EvadeMethods.MorganaE);
@@ -146,7 +142,7 @@ namespace ShineSharp.Champions
 
         private void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
-            if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun))
+            if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun) && sender.IsChampion())
             {
                 if (Spells[Q].IsReady())
                     Spells[Q].Cast(sender.ServerPosition);
