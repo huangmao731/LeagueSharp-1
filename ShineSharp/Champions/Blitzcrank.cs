@@ -23,6 +23,7 @@ namespace ShineSharp.Champions
 
             harass = new Menu("Harass", "Harass");
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
+            harass.AddItem(new MenuItem("HUSEE", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
             laneclear = new Menu("LaneClear", "LaneClear");
@@ -66,7 +67,7 @@ namespace ShineSharp.Champions
             if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
             {
                 var t = (from enemy in HeroManager.Enemies
-                    where enemy.IsValidTarget(Spells[Q].Range)
+                    where enemy.IsValidTarget(Spells[Q].Range - 30)
                     orderby TargetSelector.GetPriority(enemy) descending
                     select enemy).FirstOrDefault();
                 if (t != null)
@@ -79,7 +80,7 @@ namespace ShineSharp.Champions
         public void Combo()
         {
             bool chase = false;
-            if (Spells[R].IsReady() && Config.Item("CUSERGRAB").GetValue<bool>())
+            if (Spells[R].IsReady() && Spells[Q].IsReady() && Config.Item("CUSERGRAB").GetValue<bool>())
             {
                 var t = HeroManager.Enemies.Where(p => p.IsValidTarget(Spells[R].Range + 100)).OrderBy(q => TargetSelector.GetPriority(q)).LastOrDefault();
                 if (t != null)
@@ -126,7 +127,7 @@ namespace ShineSharp.Champions
                     CastSkillshot(target, Spells[Q]);
             }
 
-            if (Spells[E].IsReady())
+            if (Spells[E].IsReady() && Config.Item("HUSEE").GetValue<bool>())
             {
                 var target = TargetSelector.GetTarget(Spells[E].Range, TargetSelector.DamageType.Physical);
                 Spells[E].Cast();
