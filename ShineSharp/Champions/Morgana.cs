@@ -144,10 +144,10 @@ namespace ShineSharp.Champions
         {
             if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun) && sender.IsChampion())
             {
-                if (Spells[Q].IsReady())
+                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range))
                     Spells[Q].Cast(sender.ServerPosition);
 
-                if (Spells[W].IsReady())
+                if (Spells[W].IsReady() && sender.IsValidTarget(Spells[W].Range))
                     Spells[W].Cast(sender.ServerPosition);
             }
         }
