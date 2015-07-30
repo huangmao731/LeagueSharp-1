@@ -37,11 +37,10 @@ namespace ShineSharp.Champions
 
             Config.AddSubMenu(combo);
             Config.AddSubMenu(harass);
-            Config.AddSubMenu(laneclear);
             Config.AddSubMenu(evade);
             Config.AddSubMenu(misc);
             Config.AddToMainMenu();
-
+            
             base.OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Combo] += Combo;
             base.OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Mixed] += Harass;
             base.OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;

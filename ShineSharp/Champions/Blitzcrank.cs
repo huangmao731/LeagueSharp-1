@@ -33,7 +33,6 @@ namespace ShineSharp.Champions
 
             misc = new Menu("Misc", "Misc");
             misc.AddItem(new MenuItem("MAUTOQ", "Auto Grab (Q)").SetValue(true));
-            m_evader = new Evader(out evade, EvadeMethods.EzrealE);
     
             Config.AddSubMenu(combo);
             Config.AddSubMenu(harass);
