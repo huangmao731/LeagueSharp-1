@@ -82,6 +82,7 @@
     <Compile Include="ShineCommon\Activator.cs" />
     <Compile Include="ShineCommon\BaseChamp.cs" />
     <Compile Include="Champions\Ezreal.cs" />
+    <Compile Include="ShineCommon\HookManager.cs" />
     <Compile Include="ShineCommon\Maths\ClipperWrapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

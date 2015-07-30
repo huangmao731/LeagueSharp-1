@@ -45,6 +45,11 @@ namespace ShineCommon
         public Collisions Collisionable;
     }
 
+    public class EscapeSpellData : SpellData
+    {
+
+    }
+
     public class SpellDatabase
     {
         public static List<SpellData> EvadeableSpells;
@@ -728,6 +733,9 @@ namespace ShineCommon
                     MissileSpellName = "SwainShadowGrasp",
                     EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
                 });
+            #endregion
+            #region Escape Spell Data
+
             #endregion
         }
     }

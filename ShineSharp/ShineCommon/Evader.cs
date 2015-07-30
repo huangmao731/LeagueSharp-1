@@ -142,7 +142,7 @@ namespace ShineCommon
                     if (sender_pos.Distance(end_pos) > dcspell.Spell.Range)
                         end_pos = sender_pos + direction * dcspell.Spell.Range;
 
-                    Geometry.Polygon my_hitbox = ClipperWrapper.DefineRectangle(my_pos, my_pos + 60, 60); //TO DO: Ally hitbox check
+                    Geometry.Polygon my_hitbox = ClipperWrapper.DefineRectangle(my_pos - 60, my_pos + 60, 60);
                     Geometry.Polygon spell_hitbox = null;
                     if (dcspell.Spell.Type == SkillshotType.SkillshotLine)
                     {
