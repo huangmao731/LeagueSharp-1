@@ -120,8 +120,8 @@ namespace ShineSharp.Champions
             {
                 if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
                 {
-                    var t = TargetSelector.GetTarget(Spells[Q].Range - 50, TargetSelector.DamageType.Magical);
-                    if (t != null)
+                    var t = TargetSelector.GetTargetNoCollision(Spells[Q]);
+                    if (t != null && (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield)) && t.IsValidTarget(Spells[Q].Range - 30))
                     {
                         if (Config.Item("nograb" + t.ChampionName).GetValue<bool>())
                             return;
