@@ -48,10 +48,10 @@ namespace ShineSharp.Champions
             //
             misc.AddSubMenu(autograb);
             //
-            Menu interrupt = new Menu("aintrpt", "Auto Interrupt");
+            Menu interrupt = new Menu("Auto Interrupt", "aintrpt");
             interrupt.AddItem(new MenuItem("MINTQ", "Use Q").SetValue(true));
-            interrupt.AddItem(new MenuItem("MINTQ", "Use E").SetValue(true));
-            interrupt.AddItem(new MenuItem("MINTQ", "Use R").SetValue(true));
+            interrupt.AddItem(new MenuItem("MINTE", "Use E").SetValue(true));
+            interrupt.AddItem(new MenuItem("MINTR", "Use R").SetValue(true));
             interrupt.AddItem(new MenuItem("MINTEN", "Enabled").SetValue(true));
             //
             misc.AddSubMenu(interrupt);
