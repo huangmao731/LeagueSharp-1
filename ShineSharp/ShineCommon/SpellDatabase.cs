@@ -45,6 +45,15 @@ namespace ShineCommon
         public Collisions Collisionable;
     }
 
+    public class MovementBuffSpellData : SpellData
+    {
+        public float[] Percent;
+        public float[] Extra;
+        public bool IsDecaying;
+        public float DecaysTo;
+        public float DecayTime;
+    }
+
     public class EscapeSpellData : SpellData
     {
 
@@ -53,6 +62,7 @@ namespace ShineCommon
     public class SpellDatabase
     {
         public static List<SpellData> EvadeableSpells;
+        public static List<MovementBuffSpellData> MovementBuffers;
 
         public static void InitalizeSpellDatabase()
         {
@@ -737,7 +747,236 @@ namespace ShineCommon
             #region Escape Spell Data
 
             #endregion
+            #region Movement Buffers
+            /*
+                Ahri Q
+                Ekko Passive
+                Gangplank Passive
+                Hecarim E
+                Karma E
+                Karma R + E
+                Kennen E
+                Olaf R
+                Lulu W
+             */
+            MovementBuffers = new List<MovementBuffSpellData>();
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Ahri",
+                SpellName = "Orb of Deception",
+                Slot = SpellSlot.Q,
+                Extra = new float[] { 215 },
+                IsDecaying = true,
+                DecayTime = 0.5f,
+                DecaysTo = 80,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Bard",
+                SpellName = "bardwspeedboost",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 50 },
+                IsDecaying = true,
+                DecayTime = 1.5f
+            });
+            
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Blitzcrank",
+                SpellName = "Overdrive",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 70, 75, 80, 85, 90 },
+                IsDecaying = true,
+                DecayTime = 0.5f,
+                DecaysTo = 10,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Ekko",
+                SpellName = "Z-Drive Resonance",
+                Slot = SpellSlot.Unknown,
+                Percent = new float[] { 40, 50, 60, 70, 80 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Evelynn",
+                SpellName = "EvelynnW",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 30, 40, 50, 60, 70 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Gangplank",
+                SpellName = "Trial by Fire",
+                Slot = SpellSlot.Unknown,
+                Percent = new float[] { 30 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Garen",
+                SpellName = "garenqhaste",
+                Slot = SpellSlot.Q,
+                Percent = new float[] { 35 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Hecarim",
+                SpellName = "Devastating Charge",
+                Slot = SpellSlot.E,
+                Percent = new float[] { 25 },
+                IsDecaying = true,
+                DecayTime = 4,
+                DecaysTo = 75,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Karma",
+                SpellName = "Inspire",
+                Slot = SpellSlot.E,
+                Percent = new float[] { 40, 45, 50, 55, 60 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Karma",
+                SpellName = "Defiance",
+                Slot = SpellSlot.E,
+                Percent = new float[] { 60 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Kennen",
+                SpellName = "Lightning Rush",
+                Slot = SpellSlot.E,
+                Percent = new float[] { 100 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Lucian",
+                SpellName = "lucianwbuff",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 40, 45, 50, 55, 60 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Lulu",
+                SpellName = "Whimsy",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 30 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Nami",
+                SpellName = "namipassivedebuff",
+                Slot = SpellSlot.Unknown,
+                Extra = new float[] { 40 }, // +10% ap
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Olaf",
+                SpellName = "Ragnarok",
+                Slot = SpellSlot.R,
+                Percent = new float[] { 50, 60, 70 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Poppy",
+                SpellName = "poppyparagonspeed",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 17, 19, 21, 23, 25 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Quinn",
+                SpellName = "quinnpassiveammo",
+                Slot = SpellSlot.W,
+                Percent = new float[] { 20, 30, 40, 50, 60 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Sona",
+                SpellName = "sonaehaste",
+                Slot = SpellSlot.E,
+                Extra = new float[] { 13, 14, 15, 16, 17 }, //-3% for ally && (+7.5% for 100 ap 3.5% for ally) + (%2 * ultlevel)
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Viktor",
+                SpellName = "haste",
+                Slot = SpellSlot.Q,
+                Percent = new float[] { 30 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "Zilean",
+                SpellName = "TimeWarp",
+                Slot = SpellSlot.E,
+                Percent = new float[] { 40, 55, 70, 85, 99 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "ITEM_PASSIVE_RAGE_HIT",
+                SpellName = "itemphageminispeed",
+                Slot = SpellSlot.Unknown,
+                Extra = new float[] { 20 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "ITEM_PASSIVE_RAGE_KILL",
+                SpellName = "itemphagespeed",
+                Slot = SpellSlot.Unknown,
+                Extra = new float[] { 60 },
+                IsDecaying = false,
+            });
+
+            MovementBuffers.Add(new MovementBuffSpellData
+            {
+                ChampionName = "ITEM_PASSIVE_FUROR",
+                SpellName = "bootsdeathmarchspeed",
+                Slot = SpellSlot.Unknown,
+                Percent = new float[] { 12 },
+                IsDecaying = true,
+                DecayTime = 2,
+            });
+            #endregion
         }
+
     }
 
     public class DetectedSpellData

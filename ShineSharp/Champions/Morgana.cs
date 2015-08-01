@@ -88,7 +88,7 @@ namespace ShineSharp.Champions
 
             if (Spells[W].IsReady() && Config.Item("CUSEW").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Spells[W].Range + -5, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Spells[W].Range - 5, TargetSelector.DamageType.Magical);
                 if (t != null)
                     CastSkillshot(t, Spells[W]);
             }

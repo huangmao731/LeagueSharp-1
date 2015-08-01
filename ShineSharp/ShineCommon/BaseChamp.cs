@@ -75,7 +75,7 @@ namespace ShineCommon
             //
         }
 
-        public void CastSkillshot(Obj_AI_Hero t, Spell s)
+        public void CastSkillshot(Obj_AI_Hero t, Spell s, HitChance hc = HitChance.High)
         {
             if (!s.IsSkillshot)
                 return;
@@ -84,7 +84,7 @@ namespace ShineCommon
             if (s.Collision)
             {
                 for (int i = 0; i < p.CollisionObjects.Count; i++)
-                    if (!p.CollisionObjects[i].IsDead && (p.CollisionObjects[i].IsEnemy || p.CollisionObjects[i].IsMinion))
+                    if (!p.CollisionObjects[i].IsDead && (p.CollisionObjects[i].IsEnemy))
                         return;
 
             }
@@ -102,31 +102,27 @@ namespace ShineCommon
                         float mulspeeddelay = t.MoveSpeed * s.Delay;
                         if (dist_waypoint - dist_target > mulspeeddelay) //running away from me
                         {
-                            //s.Cast(s.GetPrediction(t).CastPosition);
                             if (t.Path.Length >= 2 && s.Type != SkillshotType.SkillshotCircle && s.Speed != 0)
                             {
-                                s.Cast(Geometry.PositionAfter(t.Path, (int)(s.Delay + dist_target / s.Speed), (int)t.MoveSpeed));
-                                //var direction = (t.Path[1] - t.Path[0]).Normalized();
-                                //s.Cast(p.CastPosition + direction * t.MoveSpeed * (s.Delay + dist_target / s.Speed));
-                                //Console.WriteLine("new method");
+                                Vector2 castPos = Geometry.PositionAfter(t.Path, (int)(s.Delay + dist_target / s.Speed), (int)t.MoveSpeed);
+                                if (s.Collision && s.GetCollision(ObjectManager.Player.ServerPosition.To2D(), new List<Vector2> { castPos }).Exists(q => q.IsEnemy))
+                                    return;
+                                s.Cast(castPos);
                             }
-                            else s.Cast(s.GetPrediction(t).CastPosition);
-                            //Console.WriteLine("away cast");
+                            else
+                            {
+                                p = s.GetPrediction(t);
+                                if (p.Hitchance >= hc)
+                                    s.Cast(p.CastPosition);
+                            }
                             return;
-
-                            //dist_target -= mulspeeddelay;
-
-                            //dist_target -= (dist_target - mulspeeddelay) / s.Speed * t.MoveSpeed;
-                            //if (s.Type == SkillshotType.SkillshotCircle)
-                            //    dist_target += s.Width;
                         }
 
 
 
                         if (dist_waypoint < dist_target) //coming closer to me
                         {
-                            s.CastIfHitchanceEquals(t, HitChance.High);
-                            Console.WriteLine("closer cast");
+                            s.CastIfHitchanceEquals(t, hc);
                             return;
                         }
                     }
@@ -138,17 +134,13 @@ namespace ShineCommon
                             s.Cast(t.ServerPosition);
                         else if (t.Path.Length == 1)
                             s.Cast(t.Path[0]);
-                        Console.WriteLine("windingup cast");
                         return;
                     }
                 }
                 else
                 {
-                    if (t.IsValidTarget(s.Range))
-                    {
+                    if (t.IsValidTarget(s.Range) && p.Hitchance >= hc)
                         s.Cast(p.CastPosition);
-                        Console.WriteLine("else cast");
-                    }
                 }
             }
         }

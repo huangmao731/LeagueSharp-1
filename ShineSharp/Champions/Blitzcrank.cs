@@ -20,10 +20,16 @@ namespace ShineSharp.Champions
             combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(true));
             combo.AddItem(new MenuItem("CUSERGRAB", "Use R If Grabbed").SetValue(true));
             combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(2, 1, 5)));
+            //
+            Menu nograb = new Menu("Grab Filter", "autograb");
+            foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
+                nograb.AddItem(new MenuItem("nograb" + enemy.ChampionName, string.Format("Dont Grab {0}", enemy.ChampionName)).SetValue(false));
+            //
+            combo.AddSubMenu(nograb);
 
             harass = new Menu("Harass", "Harass");
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
-            harass.AddItem(new MenuItem("HUSEE", "Use Q").SetValue(true));
+            harass.AddItem(new MenuItem("HUSEE", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
             laneclear = new Menu("LaneClear", "LaneClear");
@@ -32,7 +38,23 @@ namespace ShineSharp.Champions
 
 
             misc = new Menu("Misc", "Misc");
-            misc.AddItem(new MenuItem("MAUTOQ", "Auto Grab (Q)").SetValue(true));
+            //
+            Menu autograb = new Menu("Auto Grab (Q)", "autograb");
+            foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
+                autograb.AddItem(new MenuItem("noautograb" + enemy.ChampionName, string.Format("Dont Grab {0}", enemy.ChampionName)).SetValue(false));
+            autograb.AddItem(new MenuItem("autograbimmo", "Auto Grab Immobile Target").SetValue(true));
+            autograb.AddItem(new MenuItem("MAUTOQHP", "Min. HP Percent").SetValue(new Slider(40, 1, 100)));
+            autograb.AddItem(new MenuItem("MAUTOQ", "Enabled").SetValue(true));
+            //
+            misc.AddSubMenu(autograb);
+            //
+            Menu interrupt = new Menu("aintrpt", "Auto Interrupt");
+            interrupt.AddItem(new MenuItem("MINTQ", "Use Q").SetValue(true));
+            interrupt.AddItem(new MenuItem("MINTQ", "Use E").SetValue(true));
+            interrupt.AddItem(new MenuItem("MINTQ", "Use R").SetValue(true));
+            interrupt.AddItem(new MenuItem("MINTEN", "Enabled").SetValue(true));
+            //
+            misc.AddSubMenu(interrupt);
     
             Config.AddSubMenu(combo);
             Config.AddSubMenu(harass);
@@ -46,6 +68,7 @@ namespace ShineSharp.Champions
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LastHit] += LastHit;
             BeforeOrbWalking += BeforeOrbwalk;
 
+            Interrupter2.OnInterruptableTarget += Interrupter_OnPossibleToInterrupt;
             Obj_AI_Base.OnBuffAdd += Obj_AI_Base_OnBuffAdd;
         }
 
@@ -63,14 +86,14 @@ namespace ShineSharp.Champions
         {
             #region Auto Harass
 
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= ObjectManager.Player.HealthPercent && !ObjectManager.Player.UnderTurret())
             {
                 var t = (from enemy in HeroManager.Enemies
-                    where enemy.IsValidTarget(Spells[Q].Range - 30)
+                    where enemy.IsValidTarget(Spells[Q].Range - 50)
                     orderby TargetSelector.GetPriority(enemy) descending
                     select enemy).FirstOrDefault();
-                if (t != null)
-                    CastSkillshot(t, Spells[Q]);
+                if (t != null && !Config.Item("noautograb" + t.ChampionName).GetValue<bool>())
+                    CastSkillshot(t, Spells[Q], HitChance.VeryHigh);
             }
 
             #endregion
@@ -84,6 +107,8 @@ namespace ShineSharp.Champions
                 var t = HeroManager.Enemies.Where(p => p.IsValidTarget(Spells[R].Range + 100)).OrderBy(q => TargetSelector.GetPriority(q)).LastOrDefault();
                 if (t != null)
                 {
+                    if (Config.Item("nograb" + t.ChampionName).GetValue<bool>())
+                        return;
                     chase = true;
                     if(Spells[W].IsReady())
                         Spells[W].Cast();
@@ -95,9 +120,13 @@ namespace ShineSharp.Champions
             {
                 if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
                 {
-                    var t = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
+                    var t = TargetSelector.GetTarget(Spells[Q].Range - 50, TargetSelector.DamageType.Magical);
                     if (t != null)
-                        CastSkillshot(t, Spells[Q]);
+                    {
+                        if (Config.Item("nograb" + t.ChampionName).GetValue<bool>())
+                            return;
+                        CastSkillshot(t, Spells[Q], HitChance.High);
+                    }
                 }
                 
                 if (Spells[R].IsReady())
@@ -121,7 +150,7 @@ namespace ShineSharp.Champions
 
             if (Spells[Q].IsReady() && Config.Item("HUSEQ").GetValue<bool>())
             {
-                var target = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
+                var target = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
                 if (target != null)
                     CastSkillshot(target, Spells[Q]);
             }
@@ -183,8 +212,26 @@ namespace ShineSharp.Champions
         {
             if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun) && sender.IsChampion())
             {
-                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range))
+                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range) && Config.Item("autograbimmo").GetValue<bool>() && !Config.Item("noautograb" + (sender as Obj_AI_Hero).ChampionName).GetValue<bool>())
                     Spells[Q].Cast(sender.ServerPosition);
+            }
+        }
+
+        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (Config.Item("MINTEN").GetValue<bool>())
+            {
+                if (Config.Item("MINTQ").GetValue<bool>() && Spells[Q].IsReady())
+                    CastSkillshot(sender, Spells[Q], HitChance.Low);
+
+                if (Config.Item("MINTE").GetValue<bool>() && Spells[E].IsReady() && sender.Distance(ObjectManager.Player.ServerPosition) <= Spells[E].RangeSqr)
+                {
+                    Spells[E].Cast();
+                    ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, sender);
+                }
+
+                if (Config.Item("MINTR").GetValue<bool>() && Spells[R].IsReady() && sender.Distance(ObjectManager.Player.ServerPosition) <= Spells[R].RangeSqr)
+                    Spells[R].Cast();
             }
         }
     }
