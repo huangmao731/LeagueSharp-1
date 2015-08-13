@@ -106,7 +106,7 @@ namespace ShineSharp.Champions
 
         public override void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Spells[R].IsReady() && misc.Item("MANTIGAPR").GetValue<bool>())
+            if (Spells[R].IsReady() && gapcloser.Sender.IsValidTarget(300) && misc.Item("MANTIGAPR").GetValue<bool>())
                 Spells[R].Cast();
         }
 
