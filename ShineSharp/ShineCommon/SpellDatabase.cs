@@ -15,8 +15,13 @@ namespace ShineCommon
         EzrealE = 1,
         SivirE = 2,
         MorganaE = 4,
-        QSS = 16,
-        None = 32,
+        KayleR = 16,
+        FizzE = 32,
+        LissandraR = 64,
+        NocturneW = 128,
+        VladimirW = 256,
+        QSS = 512,
+        None = 1024,
     }
 
     [Flags]
@@ -68,6 +73,7 @@ namespace ShineCommon
         {
             EvadeableSpells = new List<SpellData>();
             #region CC Spell Database
+            //diana q x axis eliptic radius 315
             EvadeableSpells.Add(
                 new SpellData
                 {

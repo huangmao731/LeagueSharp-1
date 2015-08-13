@@ -7,9 +7,11 @@ using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 using ShineCommon;
-using Geometry = ShineCommon.Maths.Geometry;
+using ShineCommon.Maths;
 using SharpDX;
-
+//typedefs
+using Prediction = ShineCommon.Maths.Prediction;
+using Geometry = ShineCommon.Maths.Geometry;
 
 namespace ShineCommon
 {
@@ -17,7 +19,7 @@ namespace ShineCommon
     {
         public const int Q = 0, W = 1, E = 2, R = 3;
 
-        public Menu Config, combo, harass, laneclear, misc, drawing, evade;
+        public Menu Config, combo, harass, laneclear, misc, drawing, evade, pred;
         public Orbwalking.Orbwalker Orbwalker;
         public Spell[] Spells = new Spell[4];
         public Evader m_evader;
@@ -29,11 +31,20 @@ namespace ShineCommon
         public BaseChamp(string szChampName)
         {
             Config = new Menu(String.Format("Shine# {0} !", szChampName), szChampName, true);
+            
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+            
+            pred = new Menu("Prediction Settings", "predset");
+            pred.AddItem(new MenuItem("BPREDLIST", "").SetValue(new StringList(new[] { "Shine# Prediction (recommend)", "Common Predicion" }, 0)));
+
+            drawing = new Menu("Drawings", "drawings");
+
+            Config.AddSubMenu(pred);
+            Config.AddSubMenu(drawing);
             SpellDatabase.InitalizeSpellDatabase();
         }
-
+        
         public virtual void CreateConfigMenu()
         {
             //
@@ -51,13 +62,18 @@ namespace ShineCommon
 
             if (BeforeOrbWalking != null) BeforeOrbWalking();
 
-            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None && OrbwalkingFunctions[(int)Orbwalker.ActiveMode] != null)
                 OrbwalkingFunctions[(int)Orbwalker.ActiveMode]();
         }
 
         public virtual void Drawing_OnDraw(EventArgs args)
         {
-            //
+            foreach (MenuItem it in drawing.Items)
+            {
+                Circle c = it.GetValue<Circle>();
+                if (c.Active)
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position, c.Radius, c.Color, 2);
+            }
         }
 
         public virtual void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -75,6 +91,16 @@ namespace ShineCommon
             //
         }
 
+        public virtual void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            //
+        }
+
+        public virtual void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        {
+            //
+        }
+
         public void CastSkillshot(Obj_AI_Hero t, Spell s, HitChance hc = HitChance.High)
         {
             if (!s.IsSkillshot)
@@ -84,64 +110,28 @@ namespace ShineCommon
             if (s.Collision)
             {
                 for (int i = 0; i < p.CollisionObjects.Count; i++)
-                    if (!p.CollisionObjects[i].IsDead && (p.CollisionObjects[i].IsEnemy))
+                    if (!p.CollisionObjects[i].IsDead && (p.CollisionObjects[i].IsEnemy || p.CollisionObjects[i].IsMinion))
                         return;
-
             }
 
             if ((t.HasBuffOfType(BuffType.Slow) && p.Hitchance >= HitChance.Medium) || p.Hitchance == HitChance.Immobile)
                 s.Cast(p.CastPosition);
+            else if (t.IsRecalling())
+                s.Cast(t.ServerPosition);
             else
             {
                 if (s.Type != SkillshotType.SkillshotCone)
                 {
-                    if (t.IsMoving && !t.IsWindingUp)
+                    if (s.IsReady())
                     {
-                        float dist_waypoint = ObjectManager.Player.ServerPosition.Distance(t.GetWaypoints().Last().To3D());
-                        float dist_target = ObjectManager.Player.ServerPosition.Distance(t.ServerPosition);
-                        float mulspeeddelay = t.MoveSpeed * s.Delay;
-                        if (dist_waypoint - dist_target > mulspeeddelay) //running away from me
-                        {
-                            if (t.Path.Length >= 2 && s.Type != SkillshotType.SkillshotCircle && s.Speed != 0)
-                            {
-                                Vector2 castPos = Geometry.PositionAfter(t.Path, (int)(s.Delay + dist_target / s.Speed), (int)t.MoveSpeed);
-                                if (s.Collision && s.GetCollision(ObjectManager.Player.ServerPosition.To2D(), new List<Vector2> { castPos }).Exists(q => q.IsEnemy))
-                                    return;
-                                s.Cast(castPos);
-                            }
-                            else
-                            {
-                                p = s.GetPrediction(t);
-                                if (p.Hitchance >= hc)
-                                    s.Cast(p.CastPosition);
-                            }
-                            return;
-                        }
-
-
-
-                        if (dist_waypoint < dist_target) //coming closer to me
-                        {
-                            s.CastIfHitchanceEquals(t, hc);
-                            return;
-                        }
-                    }
-                    else if (t.IsWindingUp)
-                    {
-                        if (t.Path.Length >= 2)
-                            s.Cast(t.Path[t.Path.Length / 2]);
-                        else if (t.Path.Length == 0)
-                            s.Cast(t.ServerPosition);
-                        else if (t.Path.Length == 1)
-                            s.Cast(t.Path[0]);
-                        return;
+                        if (pred.Item("BPREDLIST").GetValue<StringList>().SelectedIndex == 0)
+                            s.CastWithMovementCheck(t, hc);
+                        else
+                            s.Cast(p.CastPosition);
                     }
                 }
                 else
-                {
-                    if (t.IsValidTarget(s.Range) && p.Hitchance >= hc)
-                        s.Cast(p.CastPosition);
-                }
+                    s.Cast(p.CastPosition);
             }
         }
 

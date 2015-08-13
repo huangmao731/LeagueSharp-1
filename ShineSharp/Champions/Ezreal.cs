@@ -13,7 +13,7 @@ namespace ShineSharp.Champions
     public class Ezreal : BaseChamp
     {
         public Ezreal()
-            : base("Ezreal")
+            : base ("Ezreal")
         {
             
         }
@@ -24,16 +24,17 @@ namespace ShineSharp.Champions
             combo.AddItem(new MenuItem("CUSEQ", "Use Q").SetValue(true));
             combo.AddItem(new MenuItem("CUSEW", "Use W").SetValue(true));
             //combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(false));
+            combo.AddItem(new MenuItem("CUSER", "Use R").SetValue(true));
             combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(2, 2, 5)));
 
             harass = new Menu("Harass", "Harass");
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("HUSEW", "Use W").SetValue(true));
-            harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
+            harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 0, 100)));
 
             laneclear = new Menu("LaneClear", "LaneClear");
             laneclear.AddItem(new MenuItem("LUSEQ", "Use Q").SetValue(true));
-            laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
+            laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 0, 100)));
 
             misc = new Menu("Misc", "Misc");
             misc.AddItem(new MenuItem("MLASTQ", "Last Hit Q").SetValue(true));
@@ -61,13 +62,14 @@ namespace ShineSharp.Champions
             Spells[Q] = new Spell(SpellSlot.Q, 1190);
             Spells[Q].SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
 
-            Spells[W] = new Spell(SpellSlot.W, 800);
+            Spells[W] = new Spell(SpellSlot.W, 800f);
             Spells[W].SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
 
-            Spells[E] = new Spell(SpellSlot.E, 475);
+            Spells[E] = new Spell(SpellSlot.E, 475f);
 
-            Spells[R] = new Spell(SpellSlot.R, 2500);
+            Spells[R] = new Spell(SpellSlot.R, 0f);
             Spells[R].SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
+
             m_evader.SetEvadeSpell(Spells[E]);
         }
 
@@ -95,7 +97,7 @@ namespace ShineSharp.Champions
         public void BeforeOrbwalk()
         {
             #region Auto Harass
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret() && ObjectManager.Player.CountEnemiesInRange(Spells[Q].Range) > 2)
             {
                 var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Spells[Q].Range) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
                 if (t != null)
@@ -106,7 +108,7 @@ namespace ShineSharp.Champions
             #region Auto Ult
             if (Config.Item("MUSER").GetValue<bool>() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(600) == 0)
             {
-                var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Spells[R].Range) && CalculateDamageR(enemy) > enemy.Health orderby enemy.ServerPosition.Distance(ObjectManager.Player.ServerPosition) descending select enemy).FirstOrDefault();
+                var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(2500f) && CalculateDamageR(enemy) > enemy.Health orderby enemy.ServerPosition.Distance(ObjectManager.Player.ServerPosition) descending select enemy).FirstOrDefault();
                 if (t != null)
                     Spells[R].Cast(Spells[R].GetPrediction(t).CastPosition);
             }
@@ -129,9 +131,9 @@ namespace ShineSharp.Champions
                     CastSkillshot(t, Spells[W]);
             }
 
-            if (Spells[R].IsReady())
+            if (Spells[R].IsReady() && Config.Item("CUSER").GetValue<bool>())
             {
-                var t = HeroManager.Enemies.Where(p => p.IsValidTarget(Spells[R].Range)).OrderBy(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                var t = HeroManager.Enemies.Where(p => p.IsValidTarget(2500f)).OrderBy(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
                 if(t != null)
                     Spells[R].CastIfWillHit(t, Config.Item("CUSERHIT").GetValue<Slider>().Value);
             }
@@ -160,7 +162,7 @@ namespace ShineSharp.Champions
 
         public void LaneClear()
         {
-            if (Spells[Q].IsReady() && ObjectManager.Player.ManaPercent < Config.Item("LMANA").GetValue<Slider>().Value || !Config.Item("LUSEQ").GetValue<bool>())
+            if (!Spells[Q].IsReady() || ObjectManager.Player.ManaPercent < Config.Item("LMANA").GetValue<Slider>().Value || !Config.Item("LUSEQ").GetValue<bool>())
                 return;
 
             var t = (from minion in MinionManager.GetMinions(Spells[Q].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth) where minion.IsValidTarget(Spells[Q].Range) && Spells[Q].GetDamage(minion) >= minion.Health orderby minion.Distance(ObjectManager.Player.Position) descending select minion).FirstOrDefault();

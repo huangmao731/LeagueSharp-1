@@ -143,21 +143,25 @@ namespace ShineCommon.Maths
             }
         }
 
-        public static Vector2 PositionAfter(Vector3[] self, int t, int speed, int delay = 0)
+        public static Vector2 PositionAfter(List<Vector2> path, float t, float speed, float delay = 0)
         {
-            var distance = Math.Max(0, t - delay) * speed / 1000;
-            for (var i = 0; i <= self.Length - 2; i++)
+            if (delay >= t)
+                throw new ArgumentException("Invalid Argument [delay]");
+            var distance = (t - delay) * speed / 1000;
+            for (var i = 0; i <= path.Count - 2; i++)
             {
-                var from = self[i].To2D();
-                var to = self[i + 1].To2D();
-                var d = (int)to.Distance(from);
-                if (d > distance)
+                var d = path[i + 1].Distance(path[i]);
+                if (distance == d)
                 {
-                    return from + distance * (to - from).Normalized();
+                    return path[i + 1];
                 }
-                distance -= d;
+                else if (distance < d)
+                {
+                    return path[i] + distance * (path[i + 1] - path[i]).Normalized();
+                }
+                else distance -= d;
             }
-            return self[self.Length - 1].To2D();
+            return path[path.Count - 1];
         }
 
     }

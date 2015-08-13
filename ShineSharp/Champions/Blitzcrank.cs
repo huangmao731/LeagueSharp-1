@@ -8,8 +8,9 @@ namespace ShineSharp.Champions
     public class Blitzcrank : BaseChamp
     {
         public Blitzcrank()
-            : base("Blitzcrank")
+            : base ("Blitzcrank")
         {
+
         }
 
         public override void CreateConfigMenu()
@@ -42,7 +43,8 @@ namespace ShineSharp.Champions
             Menu autograb = new Menu("Auto Grab (Q)", "autograb");
             foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
                 autograb.AddItem(new MenuItem("noautograb" + enemy.ChampionName, string.Format("Dont Grab {0}", enemy.ChampionName)).SetValue(false));
-            autograb.AddItem(new MenuItem("autograbimmo", "Auto Grab Immobile Target").SetValue(true));
+            autograb.AddItem(new MenuItem("MAUTOQIMMO", "Auto Grab Immobile Target").SetValue(true));
+            autograb.AddItem(new MenuItem("MAUTOQRANGE", "Max. Grab Range").SetValue(new Slider(800, 1, 1000)));
             autograb.AddItem(new MenuItem("MAUTOQHP", "Min. HP Percent").SetValue(new Slider(40, 1, 100)));
             autograb.AddItem(new MenuItem("MAUTOQ", "Enabled").SetValue(true));
             //
@@ -55,7 +57,18 @@ namespace ShineSharp.Champions
             interrupt.AddItem(new MenuItem("MINTEN", "Enabled").SetValue(true));
             //
             misc.AddSubMenu(interrupt);
-    
+
+            misc.AddItem(new MenuItem("MTGRAB", "Show Toggle Harass Status").SetValue(true))
+                    .ValueChanged += (s, ar) =>
+                    {
+                        if (ar.GetNewValue<bool>())
+                            Config.SubMenu("Orbwalking").Item("Farm").Permashow(true, "Grab Toggle Status");
+                        else
+                            Config.SubMenu("Orbwalking").Item("Farm").Permashow(false);
+                    };
+
+            Config.SubMenu("Orbwalking").Item("Farm").Permashow(true, "Grab Toggle Status");
+
             Config.AddSubMenu(combo);
             Config.AddSubMenu(harass);
             Config.AddSubMenu(laneclear);
@@ -67,16 +80,13 @@ namespace ShineSharp.Champions
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LastHit] += LastHit;
             BeforeOrbWalking += BeforeOrbwalk;
-
-            Interrupter2.OnInterruptableTarget += Interrupter_OnPossibleToInterrupt;
-            Obj_AI_Base.OnBuffAdd += Obj_AI_Base_OnBuffAdd;
         }
 
         public override void SetSpells()
         {
             Spells[Q] = new Spell(SpellSlot.Q, 1000f);
             Spells[Q].SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.SkillshotLine);
-            Spells[W] = new Spell(SpellSlot.W, 200);
+            Spells[W] = new Spell(SpellSlot.W, 0f);
             Spells[E] = new Spell(SpellSlot.E, 125);
             Spells[R] = new Spell(SpellSlot.R, 550f);
         }
@@ -86,14 +96,11 @@ namespace ShineSharp.Champions
         {
             #region Auto Harass
 
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= ObjectManager.Player.HealthPercent && !ObjectManager.Player.UnderTurret())
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100 && !ObjectManager.Player.UnderTurret())
             {
-                var t = (from enemy in HeroManager.Enemies
-                    where enemy.IsValidTarget(Spells[Q].Range - 50)
-                    orderby TargetSelector.GetPriority(enemy) descending
-                    select enemy).FirstOrDefault();
+                var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Config.Item("MAUTOQRANGE").GetValue<Slider>().Value) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
                 if (t != null && !Config.Item("noautograb" + t.ChampionName).GetValue<bool>())
-                    CastSkillshot(t, Spells[Q], HitChance.VeryHigh);
+                    CastSkillshot(t, Spells[Q], HitChance.High);
             }
 
             #endregion
@@ -208,29 +215,28 @@ namespace ShineSharp.Champions
             }
         }
 
-        private void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        public override void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
-            if (args.Buff.Caster.IsAlly && (args.Buff.Type == BuffType.Snare || args.Buff.Type == BuffType.Stun) && sender.IsChampion())
+            if (sender.IsEnemy && ShineCommon.Utility.IsImmobilizeBuff(args.Buff.Type) && sender.IsChampion() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100)
             {
-                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range) && Config.Item("autograbimmo").GetValue<bool>() && !Config.Item("noautograb" + (sender as Obj_AI_Hero).ChampionName).GetValue<bool>())
+                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range) && Config.Item("MAUTOQIMMO").GetValue<bool>() && !Config.Item("noautograb" + (sender as Obj_AI_Hero).ChampionName).GetValue<bool>())
                     Spells[Q].Cast(sender.ServerPosition);
             }
         }
 
-        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        public override void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
             if (Config.Item("MINTEN").GetValue<bool>())
             {
-                if (Config.Item("MINTQ").GetValue<bool>() && Spells[Q].IsReady())
+                if (Config.Item("MINTQ").GetValue<bool>() && Spells[Q].IsReady() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100)
                     CastSkillshot(sender, Spells[Q], HitChance.Low);
-
                 if (Config.Item("MINTE").GetValue<bool>() && Spells[E].IsReady() && sender.Distance(ObjectManager.Player.ServerPosition) <= Spells[E].RangeSqr)
                 {
                     Spells[E].Cast();
                     ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, sender);
                 }
 
-                if (Config.Item("MINTR").GetValue<bool>() && Spells[R].IsReady() && sender.Distance(ObjectManager.Player.ServerPosition) <= Spells[R].RangeSqr)
+                if (Config.Item("MINTR").GetValue<bool>() && Spells[R].IsReady() && sender.IsValidTarget(Spells[R].RangeSqr))
                     Spells[R].Cast();
             }
         }

@@ -27,43 +27,57 @@ namespace ShineCommon
             Target = obj;
         }
     }
+
     public class Evader
     {
         private EvadeMethods SpecialMethod;
         private Spell EvadeSpell;
-        private Menu evade;
+        private Menu evade = null, shieldAlly = null;
         private Thread m_evade_thread;
 
         public ObjectPool<DetectedSpellData> m_spell_pool = new ObjectPool<DetectedSpellData>(() => new DetectedSpellData());
         public ConcurrentQueue<DetectedSpellData> m_spell_queue = new ConcurrentQueue<DetectedSpellData>();
         public ConcurrentQueue<EvadeData> m_evade_queue = new ConcurrentQueue<EvadeData>();
 
-        public object m_lock;
-
         public Evader(out Menu _evade, EvadeMethods method = EvadeMethods.None, Spell spl = null)
         {
             SpecialMethod = method;
             EvadeSpell = spl;
             evade = new Menu("Evade", "Evade");
-            evade.AddItem(new MenuItem("EVADEENABLE", "Enabled").SetValue(false));
+
             foreach (var enemy in HeroManager.Enemies)
             {
                 foreach (var spell in SpellDatabase.EvadeableSpells.Where(p => p.ChampionName == enemy.ChampionName && p.EvadeMethods.HasFlag(method)))
-                {
                     evade.AddItem(new MenuItem(spell.SpellName, String.Format("{0} ({1})", spell.ChampionName, spell.Slot)).SetValue(true));
-                    evade.Item("EVADEENABLE").SetValue(true);
-                }
             }
+
+            evade.AddItem(new MenuItem("EVADEMETHOD", "Evade Method: ").SetValue(new StringList(new[] { "Near Turret", "Less Enemies", "Auto" }, 2)));
+            evade.AddItem(new MenuItem("EVADEENABLE", "Enabled").SetValue(false));
+
+            if (method.HasFlag(EvadeMethods.MorganaE) || method.HasFlag(EvadeMethods.KayleR))
+            {
+                shieldAlly = new Menu("Ally Shielding", "allyshield");
+                foreach (var ally in HeroManager.Allies)
+                    if(!ally.IsMe)
+                        shieldAlly.AddItem(new MenuItem("shield" + ally.ChampionName, "Shield " + ally.ChampionName).SetValue(true));
+
+                shieldAlly.AddItem(new MenuItem("SHIELDENABLED", "Enabled").SetValue(true));
+                evade.AddSubMenu(shieldAlly);
+            }
+            
             _evade = evade;
             m_evade_thread = new Thread(new ThreadStart(EvadeThread));
             m_evade_thread.Start();
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+
+            Game.PrintChat("<font color='#ff3232'>Shine#: </font><font color='#d4d4d4'>Evader loaded for champion {0} !</font>", ObjectManager.Player.ChampionName);
         }
 
         public void SetEvadeSpell(Spell spl)
         {
             EvadeSpell = spl;
+            evade.Item("EVADEENABLE").SetValue(true);
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -85,8 +99,13 @@ namespace ShineCommon
                         }
                     }
                 }
-                if (item == null && args.Target != null && args.Target.IsMe && args != null && args.SData != null && !args.SData.IsAutoAttack())
-                    OnSpellHitDetected(null, sender_pos, ObjectManager.Player);
+
+                //to do: ally check
+                if (item == null && args.Target != null && args.Target.IsMe && args != null && args.SData != null && !args.SData.IsAutoAttack() && sender.IsChampion())
+                {
+                    if(sender.GetSpellDamage(ObjectManager.Player, args.SData.Name) * 2 >= ObjectManager.Player.Health)
+                        OnSpellHitDetected(sender_pos, ObjectManager.Player);
+                }
             }
         }
 
@@ -111,20 +130,41 @@ namespace ShineCommon
             }
         }
 
-        public void OnSpellHitDetected(SpellData spell, Vector2 direction, Obj_AI_Base target)
+        public void OnSpellHitDetected(Vector2 direction, Obj_AI_Base target)
         {
             EvadeData edata;
-            if (spell == null) //direct cast
+
+            Vector2 evade_direction = direction.Perpendicular();
+            Vector2 evade_pos = ObjectManager.Player.ServerPosition.To2D() + direction.Perpendicular() * EvadeSpell.Range;
+
+            bool position_needed = !(SpecialMethod.HasFlag(EvadeMethods.MorganaE) || SpecialMethod.HasFlag(EvadeMethods.LissandraR) || SpecialMethod.HasFlag(EvadeMethods.KayleR) || SpecialMethod.HasFlag(EvadeMethods.SivirE) || SpecialMethod.HasFlag(EvadeMethods.NocturneW) || SpecialMethod.HasFlag(EvadeMethods.VladimirW));
+
+            if (position_needed)
             {
-                //
+                switch (evade.Item("EVADEMETHOD").GetValue<StringList>().SelectedIndex)
+                {
+                    case 0: //near turret
+                        CorrectNearTurret(ref evade_pos, evade_direction.Perpendicular());
+                        break;
+
+                    case 1: //less enemies
+                        CorrectLessEnemies(ref evade_pos, evade_direction.Perpendicular());
+                        break;
+
+                    case 2: //both
+                        if (!CorrectLessEnemies(ref evade_pos, evade_direction.Perpendicular()))
+                            CorrectNearTurret(ref evade_pos, evade_direction.Perpendicular());
+                        break;
+                }
             }
-            else
-            {
-                Vector2 evade_direction = direction.Perpendicular();
-                Vector2 evade_pos = ObjectManager.Player.Position.To2D() + direction.Perpendicular() * EvadeSpell.Range;
-                edata = new EvadeData(evade_pos, SpecialMethod.HasFlag(EvadeMethods.MorganaE), SpecialMethod.HasFlag(EvadeMethods.SivirE), target);
-                m_evade_queue.Enqueue(edata);
-            }
+
+            edata = new EvadeData
+                (evade_pos, 
+                SpecialMethod.HasFlag(EvadeMethods.MorganaE) || SpecialMethod.HasFlag(EvadeMethods.LissandraR) || SpecialMethod.HasFlag(EvadeMethods.KayleR), 
+                SpecialMethod.HasFlag(EvadeMethods.SivirE) || SpecialMethod.HasFlag(EvadeMethods.NocturneW) || SpecialMethod.HasFlag(EvadeMethods.VladimirW), 
+                target);
+
+            m_evade_queue.Enqueue(edata);
         }
 
         public void EvadeThread()
@@ -133,55 +173,93 @@ namespace ShineCommon
             DetectedSpellData dcspell;
             while (true)
             {
-                if (m_spell_queue.TryDequeue(out dcspell))
+                try
                 {
-                    Vector2 my_pos = ObjectManager.Player.Position.To2D();
-                    Vector2 sender_pos = dcspell.StartPosition;
-                    Vector2 end_pos = dcspell.EndPosition;
-                    Vector2 direction = (end_pos - sender_pos).Normalized();
-                    if (sender_pos.Distance(end_pos) > dcspell.Spell.Range)
-                        end_pos = sender_pos + direction * dcspell.Spell.Range;
+                    if (m_spell_queue.TryDequeue(out dcspell))
+                    {
+                        Vector2 my_pos = ObjectManager.Player.Position.To2D();
+                        Vector2 sender_pos = dcspell.StartPosition;
+                        Vector2 end_pos = dcspell.EndPosition;
+                        Vector2 direction = (end_pos - sender_pos).Normalized();
+                        if (sender_pos.Distance(end_pos) > dcspell.Spell.Range)
+                            end_pos = sender_pos + direction * dcspell.Spell.Range;
 
-                    Geometry.Polygon my_hitbox = ClipperWrapper.DefineRectangle(my_pos - 60, my_pos + 60, 60);
-                    Geometry.Polygon spell_hitbox = null;
-                    if (dcspell.Spell.Type == SkillshotType.SkillshotLine)
-                    {
-                        spell_hitbox = ClipperWrapper.DefineRectangle(sender_pos, end_pos, dcspell.Spell.Radius);
-                    }
-                    else if (dcspell.Spell.Type == SkillshotType.SkillshotCircle)
-                    {
-                        spell_hitbox = ClipperWrapper.DefineCircle(end_pos, dcspell.Spell.Radius);
-                    }
-                    else if (dcspell.Spell.Type == SkillshotType.SkillshotCone)
-                    {
-                        spell_hitbox = ClipperWrapper.DefineSector(sender_pos, end_pos - sender_pos, dcspell.Spell.Radius * (float)Math.PI / 180, dcspell.Spell.Range);
-                    }
-                    
-                    if (spell_hitbox != null)
-                    {
-                        if (ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(my_hitbox), ClipperWrapper.MakePaths(spell_hitbox)))
-                            OnSpellHitDetected(dcspell.Spell, direction, ObjectManager.Player);
-                        else
+                        Geometry.Polygon my_hitbox = ClipperWrapper.DefineRectangle(my_pos - 60, my_pos + 60, 60);
+                        Geometry.Polygon spell_hitbox = null;
+                        if (dcspell.Spell.Type == SkillshotType.SkillshotLine)
                         {
-                            if (SpecialMethod.HasFlag(EvadeMethods.MorganaE))
+                            spell_hitbox = ClipperWrapper.DefineRectangle(sender_pos, end_pos, dcspell.Spell.Radius);
+                        }
+                        else if (dcspell.Spell.Type == SkillshotType.SkillshotCircle)
+                        {
+                            spell_hitbox = ClipperWrapper.DefineCircle(end_pos, dcspell.Spell.Radius);
+                        }
+                        else if (dcspell.Spell.Type == SkillshotType.SkillshotCone)
+                        {
+                            spell_hitbox = ClipperWrapper.DefineSector(sender_pos, end_pos - sender_pos, dcspell.Spell.Radius * (float)Math.PI / 180, dcspell.Spell.Range);
+                        }
+
+                        if (spell_hitbox != null)
+                        {
+                            if (ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(my_hitbox), ClipperWrapper.MakePaths(spell_hitbox)))
+                                OnSpellHitDetected(direction, ObjectManager.Player);
+                            else
                             {
-                                foreach (Obj_AI_Base ally in ObjectManager.Player.GetAlliesInRange(EvadeSpell.Range))
+                                if ((SpecialMethod.HasFlag(EvadeMethods.MorganaE) || SpecialMethod.HasFlag(EvadeMethods.KayleR)) && shieldAlly != null && shieldAlly.Item("SHIELDENABLED").GetValue<bool>())
                                 {
-                                    Vector2 ally_pos = ally.ServerPosition.To2D();
-                                    Geometry.Polygon ally_hitbox = ClipperWrapper.DefineRectangle(ally_pos, ally_pos + 60, 60);
-                                    if (ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ally_hitbox), ClipperWrapper.MakePaths(spell_hitbox)))
+                                    var allies = ObjectManager.Player.GetAlliesInRange(EvadeSpell.Range).Where(p => !p.IsMe && shieldAlly.Item("shield" + p.ChampionName).GetValue<bool>()).OrderByDescending(q => Utility.GetPriority(q.ChampionName));
+
+                                    if (allies != null)
                                     {
-                                        OnSpellHitDetected(dcspell.Spell, direction, ally);
-                                        break;
+                                        foreach (Obj_AI_Base ally in allies)
+                                        {
+                                            Vector2 ally_pos = ally.ServerPosition.To2D();
+                                            Geometry.Polygon ally_hitbox = ClipperWrapper.DefineRectangle(ally_pos, ally_pos + 60, 60);
+                                            if (ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ally_hitbox), ClipperWrapper.MakePaths(spell_hitbox)))
+                                            {
+                                                OnSpellHitDetected(direction, ally);
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                        m_spell_pool.PutObject(dcspell);
                     }
-                    m_spell_pool.PutObject(dcspell);
+                }
+                catch
+                {
+
                 }
                 Thread.Sleep(1);
             }
+        }
+
+        private bool CorrectNearTurret(ref Vector2 evade_pos, Vector2 direction)
+        {
+            var turret = ObjectManager.Get<Obj_AI_Turret>().Where(p => p.IsAlly).MinOrDefault(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition));
+            if (turret != null)
+            {
+                if (turret.ServerPosition.To2D().Distance(evade_pos) > turret.ServerPosition.To2D().Distance(ObjectManager.Player.ServerPosition.To2D() - direction * EvadeSpell.Range))
+                {
+                    evade_pos = ObjectManager.Player.Position.To2D() - direction * EvadeSpell.Range;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool CorrectLessEnemies(ref Vector2 evade_pos, Vector2 direction)
+        {
+            if (HeroManager.Enemies.Count(p => p.ServerPosition.To2D().Distance(ObjectManager.Player.ServerPosition.To2D() + direction * EvadeSpell.Range) <= ObjectManager.Player.BasicAttack.CastRange) > HeroManager.Enemies.Count(p => p.ServerPosition.To2D().Distance(ObjectManager.Player.ServerPosition.To2D() - direction * EvadeSpell.Range) <= ObjectManager.Player.BasicAttack.CastRange))
+            {
+                    evade_pos = ObjectManager.Player.Position.To2D() - direction * EvadeSpell.Range;
+                    return true;
+            }
+
+            return false;
         }
     }
 }

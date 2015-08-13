@@ -8,6 +8,6 @@ namespace ShineSharp
 {
     public class HookManager
     {
-
+        //
     }
 }
