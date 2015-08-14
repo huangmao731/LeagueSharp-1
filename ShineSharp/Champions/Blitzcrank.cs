@@ -217,7 +217,7 @@ namespace ShineSharp.Champions
 
         public override void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
-            if (sender.IsEnemy && ShineCommon.Utility.IsImmobilizeBuff(args.Buff.Type) && sender.IsChampion() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100)
+            if (sender.IsEnemy && sender.IsChampion() && ShineCommon.Utility.IsImmobileTarget(sender as Obj_AI_Hero) && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100)
             {
                 if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range) && Config.Item("MAUTOQIMMO").GetValue<bool>() && !Config.Item("noautograb" + (sender as Obj_AI_Hero).ChampionName).GetValue<bool>())
                     Spells[Q].Cast(sender.ServerPosition);

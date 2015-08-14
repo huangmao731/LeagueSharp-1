@@ -57,5 +57,10 @@ namespace ShineCommon
         {
             return type == BuffType.Snare || type == BuffType.Stun || type == BuffType.Charm || type == BuffType.Knockup || type == BuffType.Suppression;
         }
+
+        public static bool IsImmobileTarget(Obj_AI_Hero target)
+        {
+            return target.Buffs.Count(p => IsImmobilizeBuff(p.Type)) > 0 || target.IsChannelingImportantSpell();
+        }
     }
 }

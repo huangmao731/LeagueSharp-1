@@ -112,7 +112,7 @@ namespace ShineSharp.Champions
 
         public override void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
-            if (sender.IsEnemy && ShineCommon.Utility.IsImmobilizeBuff(args.Buff.Type) && sender.IsChampion() && misc.Item("MAUTOQIMMO").GetValue<bool>())
+            if (sender.IsEnemy && sender.IsChampion() && ShineCommon.Utility.IsImmobileTarget(sender as Obj_AI_Hero) && misc.Item("MAUTOQIMMO").GetValue<bool>())
                 if (Spells[Q].IsReady())
                     Spells[Q].Cast();
         }
