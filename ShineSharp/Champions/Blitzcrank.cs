@@ -78,7 +78,6 @@ namespace ShineSharp.Champions
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.Combo] += Combo;
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.Mixed] += Harass;
             OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
-            OrbwalkingFunctions[(int) Orbwalking.OrbwalkingMode.LastHit] += LastHit;
             BeforeOrbWalking += BeforeOrbwalk;
         }
 
@@ -87,7 +86,7 @@ namespace ShineSharp.Champions
             Spells[Q] = new Spell(SpellSlot.Q, 1000f);
             Spells[Q].SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.SkillshotLine);
             Spells[W] = new Spell(SpellSlot.W, 0f);
-            Spells[E] = new Spell(SpellSlot.E, 125);
+            Spells[E] = new Spell(SpellSlot.E, 125f);
             Spells[R] = new Spell(SpellSlot.R, 550f);
         }
 
@@ -127,7 +126,7 @@ namespace ShineSharp.Champions
             {
                 if (Spells[Q].IsReady() && Config.Item("CUSEQ").GetValue<bool>())
                 {
-                    var t = TargetSelector.GetTargetNoCollision(Spells[Q]);
+                    var t = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
                     if (t != null && (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield)) && t.IsValidTarget(Spells[Q].Range - 30))
                     {
                         if (Config.Item("nograb" + t.ChampionName).GetValue<bool>())
@@ -161,12 +160,6 @@ namespace ShineSharp.Champions
                 if (target != null)
                     CastSkillshot(target, Spells[Q]);
             }
-
-            if (Spells[E].IsReady() && Config.Item("HUSEE").GetValue<bool>())
-            {
-                var target = TargetSelector.GetTarget(Spells[E].Range, TargetSelector.DamageType.Physical);
-                Spells[E].Cast();
-            }
         }
 
         public void LaneClear()
@@ -176,42 +169,20 @@ namespace ShineSharp.Champions
 
             if (Spells[R].IsReady() && Config.Item("LUSER").GetValue<bool>())
             {
-                var t =
-                    (from minion in
-                         MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy,
-                             MinionOrderTypes.MaxHealth)
-                     where
-                         minion.IsValidTarget(Spells[R].Range) && Spells[R].GetDamage(minion) >= minion.Health
-                     orderby minion.Health ascending
-                     select minion);
+                var t = (from minion in MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth) where minion.IsValidTarget(Spells[R].Range) && Spells[R].GetDamage(minion) >= minion.Health orderby minion.Health ascending select minion);
                 if (t != null && t.Count() >= 3)
                     Spells[R].Cast(t.FirstOrDefault().ServerPosition);
             }
         }
 
-        public void LastHit()
-        {
-            //if (Spells[E].IsReady() && Config.Item("MLASTE").GetValue<bool>())
-            //{
-            //    var t =
-            //        (from minion in
-            //             MinionManager.GetMinions(Spells[E].Range, MinionTypes.All, MinionTeam.Enemy,
-            //                 MinionOrderTypes.MaxHealth)
-            //         where
-            //             minion.IsValidTarget(Spells[E].Range) && Spells[E].GetDamage(minion) >= minion.Health &&
-            //             (!minion.UnderTurret() &&
-            //              minion.Distance(ObjectManager.Player.Position) > ObjectManager.Player.AttackRange)
-            //         orderby minion.Health ascending
-            //         select minion).FirstOrDefault();
-            //}
-        }
-
         public override void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (args.Unit.IsMe && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (args.Unit.IsMe && HeroManager.Enemies.Exists(p => p.NetworkId == args.Target.NetworkId) && ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && combo.Item("CUSEE").GetValue<bool>()) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && harass.Item("HUSEE").GetValue<bool>())))
             {
                 if (Spells[E].IsReady())
                     Spells[E].Cast();
+
+                ObjectManager.Player.IssueOrder(GameObjectOrder.AutoAttack, args.Target);
             }
         }
 
@@ -230,13 +201,14 @@ namespace ShineSharp.Champions
             {
                 if (Config.Item("MINTQ").GetValue<bool>() && Spells[Q].IsReady() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100)
                     CastSkillshot(sender, Spells[Q], HitChance.Low);
+
                 if (Config.Item("MINTE").GetValue<bool>() && Spells[E].IsReady() && sender.Distance(ObjectManager.Player.ServerPosition) <= Spells[E].RangeSqr)
                 {
                     Spells[E].Cast();
                     ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, sender);
                 }
 
-                if (Config.Item("MINTR").GetValue<bool>() && Spells[R].IsReady() && sender.IsValidTarget(Spells[R].RangeSqr))
+                if (Config.Item("MINTR").GetValue<bool>() && Spells[R].IsReady() && sender.IsValidTarget(Spells[R].Range))
                     Spells[R].Cast();
             }
         }
