@@ -19,8 +19,10 @@ namespace ShineSharp.Champions
             combo.AddItem(new MenuItem("CUSEQ", "Use Q").SetValue(true));
             combo.AddItem(new MenuItem("CUSEW", "Use W").SetValue(true));
             combo.AddItem(new MenuItem("CUSEE", "Use E").SetValue(true));
+            combo.AddItem(new MenuItem("CQHITCHANCE", "Q Hit Chance").SetValue<StringList>(new StringList(ShineCommon.Utility.HitchanceNameArray, 2)));
             combo.AddItem(new MenuItem("CUSERGRAB", "Use R If Grabbed").SetValue(true));
             combo.AddItem(new MenuItem("CUSERHIT", "Use R If Enemies >=").SetValue(new Slider(2, 1, 5)));
+            
             //
             Menu nograb = new Menu("Grab Filter", "autograb");
             foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
@@ -32,6 +34,7 @@ namespace ShineSharp.Champions
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("HUSEE", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
+            combo.AddItem(new MenuItem("HQHITCHANCE", "Q Hit Chance").SetValue<StringList>(new StringList(ShineCommon.Utility.HitchanceNameArray, 2)));
 
             laneclear = new Menu("LaneClear", "LaneClear");
             laneclear.AddItem(new MenuItem("LUSER", "Use R").SetValue(true));
@@ -45,6 +48,7 @@ namespace ShineSharp.Champions
                 autograb.AddItem(new MenuItem("noautograb" + enemy.ChampionName, string.Format("Dont Grab {0}", enemy.ChampionName)).SetValue(false));
             autograb.AddItem(new MenuItem("MAUTOQIMMO", "Auto Grab Immobile Target").SetValue(true));
             autograb.AddItem(new MenuItem("MAUTOQRANGE", "Max. Grab Range").SetValue(new Slider(800, 1, 1000)));
+            autograb.AddItem(new MenuItem("MAUTOQHITCHANCE", "Auto Grab Hit Chance").SetValue<StringList>(new StringList(ShineCommon.Utility.HitchanceNameArray, 2)));
             autograb.AddItem(new MenuItem("MAUTOQHP", "Min. HP Percent").SetValue(new Slider(40, 1, 100)));
             autograb.AddItem(new MenuItem("MAUTOQ", "Enabled").SetValue(true));
             //
@@ -99,7 +103,7 @@ namespace ShineSharp.Champions
             {
                 var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Config.Item("MAUTOQRANGE").GetValue<Slider>().Value) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
                 if (t != null && !Config.Item("noautograb" + t.ChampionName).GetValue<bool>())
-                    CastSkillshot(t, Spells[Q], HitChance.High);
+                    CastSkillshot(t, Spells[Q], ShineCommon.Utility.HitchanceArray[Config.Item("MAUTOQHITCHANCE").GetValue<StringList>().SelectedIndex]);
             }
 
             #endregion
@@ -131,7 +135,7 @@ namespace ShineSharp.Champions
                     {
                         if (Config.Item("nograb" + t.ChampionName).GetValue<bool>())
                             return;
-                        CastSkillshot(t, Spells[Q], HitChance.High);
+                        CastSkillshot(t, Spells[Q], ShineCommon.Utility.HitchanceArray[Config.Item("CQHITCHANCE").GetValue<StringList>().SelectedIndex]);
                     }
                 }
                 
@@ -156,9 +160,16 @@ namespace ShineSharp.Champions
 
             if (Spells[Q].IsReady() && Config.Item("HUSEQ").GetValue<bool>())
             {
-                var target = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
+                Obj_AI_Hero target = null;
+               
+                //toggle grab
+                if (TargetSelector.SelectedTarget != null && TargetSelector.SelectedTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= Spells[Q].Range - 30)
+                    target = TargetSelector.SelectedTarget;
+                else
+                    target = TargetSelector.GetTarget(Spells[Q].Range - 30, TargetSelector.DamageType.Magical);
+
                 if (target != null)
-                    CastSkillshot(target, Spells[Q]);
+                    CastSkillshot(target, Spells[Q], ShineCommon.Utility.HitchanceArray[Config.Item("HQHITCHANCE").GetValue<StringList>().SelectedIndex]);
             }
         }
 

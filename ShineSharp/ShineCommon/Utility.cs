@@ -39,6 +39,9 @@ namespace ShineCommon
             };
         #endregion
 
+        public static string[] HitchanceNameArray = { "Low", "Medium", "High", "Very High", "Only Immobile" };
+        public static HitChance[] HitchanceArray = { HitChance.Low, HitChance.Medium, HitChance.High, HitChance.VeryHigh, HitChance.Immobile };
+
         public static int GetPriority(string championName)
         {
             if (lowPriority.Contains(championName))
@@ -61,6 +64,11 @@ namespace ShineCommon
         public static bool IsImmobileTarget(Obj_AI_Hero target)
         {
             return target.Buffs.Count(p => IsImmobilizeBuff(p.Type)) > 0 || target.IsChannelingImportantSpell();
+        }
+
+        public static bool IsActive(this Spell s)
+        {
+            return ObjectManager.Player.Spellbook.GetSpell(s.Slot).ToggleState == 2;
         }
     }
 }

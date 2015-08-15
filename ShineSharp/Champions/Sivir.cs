@@ -93,28 +93,28 @@ namespace ShineSharp.Champions
             if (!Spells[W].IsReady() || ObjectManager.Player.ManaPercent < Config.Item("LMANA").GetValue<Slider>().Value || !Config.Item("LUSEQ").GetValue<bool>())
                 return;
 
-            if (MinionManager.GetMinions(Spells[W].Range * 1.5f, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Count() >= laneclear.Item("LMINW").GetValue<Slider>().Value)
+            if (MinionManager.GetMinions(Spells[W].Range * 1.5f, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Count() >= Config.Item("LMINW").GetValue<Slider>().Value)
                 Spells[W].Cast();
         }
 
         public override void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (harass.Item("HUSEW").GetValue<bool>() || combo.Item("CUSEW").GetValue<bool>())
-                if (Spells[W].IsReady() && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && harass.Item("HMANA").GetValue<Slider>().Value >= (ObjectManager.Player.Mana / ObjectManager.Player.MaxMana * 100))))
+            if (Config.Item("HUSEW").GetValue<bool>() || Config.Item("CUSEW").GetValue<bool>())
+                if (Spells[W].IsReady() && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Config.Item("HMANA").GetValue<Slider>().Value >= (ObjectManager.Player.Mana / ObjectManager.Player.MaxMana * 100))))
                     Spells[W].Cast();
         }
 
         public override void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Spells[R].IsReady() && gapcloser.Sender.IsValidTarget(300) && misc.Item("MANTIGAPR").GetValue<bool>())
+            if (Spells[R].IsReady() && gapcloser.End.Distance(ObjectManager.Player.ServerPosition) <= 300 && Config.Item("MANTIGAPR").GetValue<bool>())
                 Spells[R].Cast();
         }
 
         public override void Obj_AI_Base_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
-            if (sender.IsEnemy && sender.IsChampion() && ShineCommon.Utility.IsImmobileTarget(sender as Obj_AI_Hero) && misc.Item("MAUTOQIMMO").GetValue<bool>())
+            if (sender.IsEnemy && sender.IsChampion() && ShineCommon.Utility.IsImmobileTarget(sender as Obj_AI_Hero) && Spells[Q].IsInRange(sender) && Config.Item("MAUTOQIMMO").GetValue<bool>())
                 if (Spells[Q].IsReady())
-                    Spells[Q].Cast();
+                    Spells[Q].Cast(sender.ServerPosition);
         }
 
     }

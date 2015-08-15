@@ -41,6 +41,9 @@ namespace ShineSharp
                 case "sivir":
                     Champion = new Sivir();
                     break;
+                case "amumu":
+                    Champion = new Amumu();
+                    break;
             }
 
             Champion.CreateConfigMenu();
@@ -55,7 +58,7 @@ namespace ShineSharp
             if (Champion.Spells[2] != null && Champion.Spells[2].Range > 0)
                 Champion.drawing.AddItem(new MenuItem("DDRAWE", "Draw E").SetValue(new Circle(true, Color.Bisque, Champion.Spells[2].Range)));
 
-            if (Champion.Spells[3] != null && Champion.Spells[3].Range > 0)
+            if (Champion.Spells[3] != null && Champion.Spells[3].Range > 0 && Champion.Spells[3].Range < 3000) //global ult ?
                 Champion.drawing.AddItem(new MenuItem("DDRAWR", "Draw R").SetValue(new Circle(true, Color.Chartreuse, Champion.Spells[3].Range)));
 
             #region Events

@@ -94,10 +94,8 @@ namespace ShineSharp.Champions
 
             if (Spells[R].IsReady())
             {
-                if (ObjectManager.Player.CountEnemiesInRange(Spells[R].Range - 40) > 2)
-                {
+                if (ObjectManager.Player.CountEnemiesInRange(Spells[R].Range - 40) >= combo.Item("CUSERHIT").GetValue<Slider>().Value)
                     Spells[R].Cast();
-                }
             }
         }
 
@@ -126,10 +124,10 @@ namespace ShineSharp.Champions
         {
             if (sender.IsEnemy && sender.IsChampion() && ShineCommon.Utility.IsImmobileTarget(sender as Obj_AI_Hero))
             {
-                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range) && misc.Item("MAUTOQIMMO").GetValue<bool>())
+                if (Spells[Q].IsReady() && sender.IsValidTarget(Spells[Q].Range) && Config.Item("MAUTOQIMMO").GetValue<bool>())
                     Spells[Q].Cast(sender.ServerPosition);
 
-                if (Spells[W].IsReady() && sender.IsValidTarget(Spells[W].Range) && misc.Item("MAUTOWIMMO").GetValue<bool>())
+                if (Spells[W].IsReady() && sender.IsValidTarget(Spells[W].Range) && Config.Item("MAUTOWIMMO").GetValue<bool>())
                     Spells[W].Cast(sender.ServerPosition);
             }
         }

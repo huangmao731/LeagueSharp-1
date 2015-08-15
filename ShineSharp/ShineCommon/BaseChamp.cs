@@ -9,6 +9,7 @@ using LeagueSharp.Common;
 using ShineCommon;
 using ShineCommon.Maths;
 using SharpDX;
+using SharpDX.Direct3D9;
 //typedefs
 using Prediction = ShineCommon.Maths.Prediction;
 using Geometry = ShineCommon.Maths.Geometry;
@@ -19,17 +20,27 @@ namespace ShineCommon
     {
         public const int Q = 0, W = 1, E = 2, R = 3;
 
-        public Menu Config, combo, harass, laneclear, misc, drawing, evade, pred;
+        public Menu Config, combo, ult, harass, laneclear, misc, drawing, evade, pred;
         public Orbwalking.Orbwalker Orbwalker;
         public Spell[] Spells = new Spell[4];
         public Evader m_evader;
+        public Font Text;
 
         public delegate void dVoidDelegate();
-        public dVoidDelegate BeforeOrbWalking;
+        public dVoidDelegate BeforeOrbWalking, BeforeDrawing;
         public dVoidDelegate[] OrbwalkingFunctions = new dVoidDelegate[4];
 
         public BaseChamp(string szChampName)
         {
+            Text = new Font(Drawing.Direct3DDevice,
+                new FontDescription
+                {
+                    FaceName = "Malgun Gothic",
+                    Height = 15,
+                    OutputPrecision = FontPrecision.Default,
+                    Quality = FontQuality.ClearTypeNatural
+                });
+
             Config = new Menu(String.Format("Shine# {0} !", szChampName), szChampName, true);
             
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
@@ -68,6 +79,9 @@ namespace ShineCommon
 
         public virtual void Drawing_OnDraw(EventArgs args)
         {
+
+            if (BeforeDrawing != null) BeforeDrawing();
+
             foreach (MenuItem it in drawing.Items)
             {
                 Circle c = it.GetValue<Circle>();
