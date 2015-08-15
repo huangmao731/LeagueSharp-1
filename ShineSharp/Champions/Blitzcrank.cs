@@ -34,7 +34,7 @@ namespace ShineSharp.Champions
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("HUSEE", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
-            combo.AddItem(new MenuItem("HQHITCHANCE", "Q Hit Chance").SetValue<StringList>(new StringList(ShineCommon.Utility.HitchanceNameArray, 2)));
+            harass.AddItem(new MenuItem("HQHITCHANCE", "Q Hit Chance").SetValue<StringList>(new StringList(ShineCommon.Utility.HitchanceNameArray, 2)));
 
             laneclear = new Menu("LaneClear", "LaneClear");
             laneclear.AddItem(new MenuItem("LUSER", "Use R").SetValue(true));
