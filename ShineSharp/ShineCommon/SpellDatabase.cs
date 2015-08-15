@@ -715,40 +715,6 @@ namespace ShineCommon
                     Collisionable = Collisions.YasuoWall,
                     EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
                 });
-
-            EvadeableSpells.Add(
-                new SpellData
-                {
-                    ChampionName = "Swain",
-                    SpellName = "SwainShadowGrasp",
-                    Slot = SpellSlot.W,
-                    IsSkillshot = true,
-                    Type = SkillshotType.SkillshotCircle,
-                    Delay = 1100,
-                    Range = 900,
-                    Radius = 180,
-                    MissileSpeed = int.MaxValue,
-                    IsDangerous = true,
-                    MissileSpellName = "SwainShadowGrasp",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
-                });
-
-            EvadeableSpells.Add(
-                new SpellData
-                {
-                    ChampionName = "Swain",
-                    SpellName = "SwainShadowGrasp",
-                    Slot = SpellSlot.W,
-                    IsSkillshot = true,
-                    Type = SkillshotType.SkillshotCircle,
-                    Delay = 1100,
-                    Range = 900,
-                    Radius = 180,
-                    MissileSpeed = int.MaxValue,
-                    IsDangerous = true,
-                    MissileSpellName = "SwainShadowGrasp",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
-                });
             #endregion
             #region Escape Spell Data
 
