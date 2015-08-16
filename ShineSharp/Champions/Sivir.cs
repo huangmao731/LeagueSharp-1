@@ -90,7 +90,7 @@ namespace ShineSharp.Champions
 
         public void LaneClear()
         {
-            if (!Spells[W].IsReady() || ObjectManager.Player.ManaPercent < Config.Item("LMANA").GetValue<Slider>().Value || !Config.Item("LUSEQ").GetValue<bool>())
+            if (!Spells[W].IsReady() || ObjectManager.Player.ManaPercent < Config.Item("LMANA").GetValue<Slider>().Value || !Config.Item("LUSEW").GetValue<bool>())
                 return;
 
             if (MinionManager.GetMinions(Spells[W].Range * 1.5f, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Count() >= Config.Item("LMINW").GetValue<Slider>().Value)
