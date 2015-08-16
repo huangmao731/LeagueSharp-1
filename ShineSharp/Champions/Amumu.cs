@@ -190,8 +190,8 @@ namespace ShineSharp.Champions
                     Spells[W].Cast();
             }
 
-            if (Spells[E].IsReady() && laneclear.Item("LUSEW").GetValue<bool>())
-                if (MinionManager.GetMinions(Spells[E].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Count > 0)
+            if (Spells[E].IsReady() && laneclear.Item("LUSEE").GetValue<bool>())
+                if (MinionManager.GetMinions(Spells[E].Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).Count > 0)
                     Spells[E].Cast();
             
         }
