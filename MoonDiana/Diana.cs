@@ -188,7 +188,7 @@ namespace ShineSharp.Champions
                             Spells[Q].Cast();
                     }
 
-                    if (Spells[R].IsReady() && !m_target.IsDead && HasMoonligh(m_target))
+                    if (Spells[R].IsReady() && !m_target.IsDead && HasMoonlight(m_target))
                         Spells[R].Cast();
                     m_moon_start_tick = 0;
                 }
@@ -216,7 +216,7 @@ namespace ShineSharp.Champions
             }
 
             if (m_target == null)
-                m_target = HeroManager.Enemies.Where(p => HasMoonligh(p) && p.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= 900).OrderByDescending(q => TargetSelector.GetPriority(q)).FirstOrDefault();
+                m_target = HeroManager.Enemies.Where(p => HasMoonlight(p) && p.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= 900).OrderByDescending(q => TargetSelector.GetPriority(q)).FirstOrDefault();
 
             if (Config.Item("CUSER").GetValue<bool>())
             {
@@ -302,13 +302,13 @@ namespace ShineSharp.Champions
             }
 
             if (m_target == null)
-                m_target = HeroManager.Enemies.Where(p => HasMoonligh(p) && p.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= 900).OrderByDescending(q => TargetSelector.GetPriority(q)).FirstOrDefault();
+                m_target = HeroManager.Enemies.Where(p => HasMoonlight(p) && p.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= 900).OrderByDescending(q => TargetSelector.GetPriority(q)).FirstOrDefault();
 
             if (Config.Item("HUSER").GetValue<bool>())
             {
                 if (m_target != null)
                 {
-                    if (m_target.ServerPosition.CountEnemiesInRange(600) == 1 && Spells[R].IsInRange(m_target) && HasMoonligh(m_target))
+                    if (m_target.ServerPosition.CountEnemiesInRange(600) == 1 && Spells[R].IsInRange(m_target) && HasMoonlight(m_target))
                     {
                         Spells[R].CastOnUnit(m_target);
 
@@ -413,7 +413,7 @@ namespace ShineSharp.Champions
             }
         }
 
-        public bool HasMoonligh(Obj_AI_Hero t)
+        public bool HasMoonlight(Obj_AI_Hero t)
         {
             return t.HasBuff("dianamoonlight");
         }
