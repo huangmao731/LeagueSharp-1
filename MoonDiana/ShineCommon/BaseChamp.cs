@@ -40,17 +40,18 @@ namespace ShineCommon
         public const int Q = 0, W = 1, E = 2, R = 3;
 
         public Menu Config, combo, ult, harass, laneclear, misc, drawing, evade, pred, activator;
-        public Orbwalking.Orbwalker Orbwalker;
+        public MoonDiana.Orbwalking.Orbwalker Orbwalker;
         public Spell[] Spells = new Spell[4];
         public Evader m_evader;
         public Font Text;
 
         public delegate void dVoidDelegate();
         public dVoidDelegate BeforeOrbWalking, BeforeDrawing;
-        public dVoidDelegate[] OrbwalkingFunctions = new dVoidDelegate[4];
+        public dVoidDelegate[] OrbwalkingFunctions = new dVoidDelegate[6];
 
         public BaseChamp(string szChampName)
         {
+            
             Text = new Font(Drawing.Direct3DDevice,
                 new FontDescription
                 {
@@ -63,7 +64,7 @@ namespace ShineCommon
             Config = new Menu(String.Format("Shine# {0} !", szChampName), szChampName, true);
             
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+            Orbwalker = new MoonDiana.Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             
             pred = new Menu("Prediction Settings", "predset");
             pred.AddItem(new MenuItem("BPREDLIST", "").SetValue(new StringList(new[] { "Shine# Prediction (recommend)", "Common Predicion" }, 0)));
@@ -97,7 +98,7 @@ namespace ShineCommon
 
             if (BeforeOrbWalking != null) BeforeOrbWalking();
 
-            if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None && OrbwalkingFunctions[(int)Orbwalker.ActiveMode] != null)
+            if (Orbwalker.ActiveMode != MoonDiana.Orbwalking.OrbwalkingMode.None && OrbwalkingFunctions[(int)Orbwalker.ActiveMode] != null)
                 OrbwalkingFunctions[(int)Orbwalker.ActiveMode]();
         }
 
@@ -114,7 +115,7 @@ namespace ShineCommon
             }
         }
 
-        public virtual void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        public virtual void Orbwalking_BeforeAttack(MoonDiana.Orbwalking.BeforeAttackEventArgs args)
         {
             //
         }

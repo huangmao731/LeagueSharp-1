@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -9,7 +10,7 @@ using ShineCommon;
 using ShineCommon.Maths;
 using SharpDX;
 
-namespace ShineSharp.Champions
+namespace MoonDiana 
 {
     public class Diana : BaseChamp
     {
@@ -72,6 +73,35 @@ namespace ShineSharp.Champions
             misc.AddItem(new MenuItem("MINTERRUPTE", "Use E For Interrupt").SetValue(true));
             misc.AddItem(new MenuItem("MINTERRUPTRE", "Use R->E For Interrupt Important Spells").SetValue(true));
             misc.AddItem(new MenuItem("MGAPCLOSEW", "Use W For Gapcloser").SetValue(true));
+            misc.AddItem(new MenuItem("MLXORBWALKER", "Use LXOrbwalker").SetValue(false))
+                        .ValueChanged += (s, ar) =>
+                        {
+                            if (ar.GetNewValue<bool>())
+                            {
+                                Orbwalker.Disable();
+                                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Combo] -= Combo;
+                                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Mixed] -= Harass;
+                                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.LaneClear] -= LaneClear;
+
+                                OrbwalkingFunctions[(int)LXOrbwalker.Mode.Combo] += Combo;
+                                OrbwalkingFunctions[(int)LXOrbwalker.Mode.Harass] += Harass;
+                                OrbwalkingFunctions[(int)LXOrbwalker.Mode.LaneClear] += LaneClear;
+                                LXOrbwalker.Enable();
+                            }
+                            else
+                            {
+                                LXOrbwalker.Disable();
+                                OrbwalkingFunctions[(int)LXOrbwalker.Mode.Combo] -= Combo;
+                                OrbwalkingFunctions[(int)LXOrbwalker.Mode.Harass] -= Harass;
+                                OrbwalkingFunctions[(int)LXOrbwalker.Mode.LaneClear] -= LaneClear;
+
+                                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Combo] += Combo;
+                                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Mixed] += Harass;
+                                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
+                                Orbwalker.Enable();
+                            }
+                        };
+            LXOrbwalker.AddToMenu(misc.SubMenu("LXOrbwalker Settings"));
 
             Config.AddSubMenu(combo);
             Config.AddSubMenu(harass);
@@ -81,9 +111,19 @@ namespace ShineSharp.Champions
 
             BeforeOrbWalking += BeforeOrbwalk;
             BeforeDrawing += BeforeDraw;
-            OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Combo] += Combo;
-            OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Mixed] += Harass;
-            OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
+            if (!LXOrbwalkerEnabled)
+            {
+                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Combo] += Combo;
+                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.Mixed] += Harass;
+                OrbwalkingFunctions[(int)Orbwalking.OrbwalkingMode.LaneClear] += LaneClear;
+            }
+            else
+            {
+                OrbwalkingFunctions[(int)LXOrbwalker.Mode.Combo] += Combo;
+                OrbwalkingFunctions[(int)LXOrbwalker.Mode.Harass] += Harass;
+                OrbwalkingFunctions[(int)LXOrbwalker.Mode.LaneClear] += LaneClear;
+                LXOrbwalker.Enable();
+            }
         }
 
         public override void SetSpells()
@@ -114,7 +154,10 @@ namespace ShineSharp.Champions
 
             if (m_target != null)
             {
-                Orbwalking.Orbwalk(m_target, Game.CursorPos);
+                if (!LXOrbwalkerEnabled)
+                    Orbwalking.Orbwalk(m_target, Game.CursorPos);
+                else
+                    LXOrbwalker.Orbwalk(Game.CursorPos, m_target);
                 if (m_target.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= 810f)
                 {
                     if (m_misaya_start_tick == 0) //begin combo
@@ -160,7 +203,10 @@ namespace ShineSharp.Champions
 
             if (m_target != null)
             {
-                Orbwalking.Orbwalk(m_target, Game.CursorPos);
+                if (!LXOrbwalkerEnabled)
+                    Orbwalking.Orbwalk(m_target, Game.CursorPos);
+                else
+                    LXOrbwalker.Orbwalk(Game.CursorPos, m_target);
                 var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health < Spells[Q].GetDamage(p) && p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
                 if (minion == null)
                 {
@@ -418,7 +464,7 @@ namespace ShineSharp.Champions
 
             foreach (var enemy in HeroManager.Enemies)
             {
-                if (enemy.Health < CalculateComboDamage(enemy) + (Spells[R].IsReady() ? CalculateDamageR(enemy) : 0))
+                if (enemy.Health < CalculateComboDamage(enemy))
                 {
                     var killable_pos = Drawing.WorldToScreen(enemy.Position);
                     Drawing.DrawText((int)killable_pos.X - 20, (int)killable_pos.Y + 35, System.Drawing.Color.Red, "Killable");
@@ -429,6 +475,48 @@ namespace ShineSharp.Champions
         public bool HasMoonlight(Obj_AI_Hero t)
         {
             return t.HasBuff("dianamoonlight");
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override double CalculateDamageW(Obj_AI_Hero target)
+        {
+            if (Config.Item("CUSEW").GetValue<bool>() && Spells[W].IsReady())
+                return ObjectManager.Player.GetSpellDamage(target, SpellSlot.W) * 3;
+
+            return 0.0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override double CalculateDamageE(Obj_AI_Hero target)
+        {
+            return 0.0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override double CalculateDamageR(Obj_AI_Hero target)
+        {
+            if (Config.Item("CUSER").GetValue<bool>() && Spells[R].IsReady())
+                return ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 2;
+
+            return 0.0;
+        }
+
+        public override void Game_OnUpdate(EventArgs args)
+        {
+            if (ObjectManager.Player.IsDead || ObjectManager.Player.IsRecalling() || args == null)
+                return;
+
+            if (BeforeOrbWalking != null) BeforeOrbWalking();
+
+            if (!LXOrbwalkerEnabled && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None && OrbwalkingFunctions[(int)Orbwalker.ActiveMode] != null)
+                OrbwalkingFunctions[(int)Orbwalker.ActiveMode]();
+            else if (LXOrbwalkerEnabled && LXOrbwalker.CurrentMode != LXOrbwalker.Mode.None && OrbwalkingFunctions[(int)LXOrbwalker.CurrentMode] != null)
+                OrbwalkingFunctions[(int)LXOrbwalker.CurrentMode]();
+        }
+
+        private bool LXOrbwalkerEnabled
+        {
+            get { return Config.Item("MLXORBWALKER").GetValue<bool>(); }
         }
     }
 }
