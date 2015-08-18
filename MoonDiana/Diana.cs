@@ -57,6 +57,7 @@ namespace ShineSharp.Champions
                             m_misaya_start_tick = 0;
                         }
                     };
+            misc.AddItem(new MenuItem("MMISAYADR", "Misaya Combo Dont Use 2nd R").SetValue(false));
             misc.AddItem(new MenuItem("MMOON", "Moon Combo Key").SetValue<KeyBind>(new KeyBind('G', KeyBindType.Press)))
                     .ValueChanged += (s, ar) =>
                     {
@@ -128,11 +129,13 @@ namespace ShineSharp.Champions
                     Spells[Q].Cast(m_target.ServerPosition);
                     if (!m_target.IsDead)
                         Spells[W].Cast();
-                    if (!m_target.IsDead)
-                        Spells[R].CastOnUnit(m_target);
-                    if (!m_target.IsDead)
-                        Spells[E].Cast();
-
+                    if (!Config.Item("MMISAYADR").GetValue<bool>())
+                    {
+                        if (!m_target.IsDead)
+                            Spells[R].CastOnUnit(m_target);
+                        if (!m_target.IsDead)
+                            Spells[E].Cast();
+                    }
                     m_misaya_start_tick = 0;
                 }
             }
