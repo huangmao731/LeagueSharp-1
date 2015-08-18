@@ -41,6 +41,11 @@ namespace ShineCommon.Maths
             return new Geometry.Sector(center, direction, angle, radius).Polygons;
         }
 
+        public static Geometry.Polygon DefineArc(Vector2 c, Vector2 direction, float angle, float w, float h)
+        {
+            return new Geometry.Arc(c, direction, angle, w, h).Polygons;
+        }
+
         public static Paths MakePaths(params Geometry.Polygon[] plist)
         {
             Paths ps = new Paths(plist.Length);

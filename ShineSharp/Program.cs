@@ -44,6 +44,9 @@ namespace ShineSharp
                 case "amumu":
                     Champion = new Amumu();
                     break;
+                case "diana":
+                    Champion = new Diana();
+                    break;
             }
 
             Champion.CreateConfigMenu();
@@ -69,6 +72,7 @@ namespace ShineSharp
             AntiGapcloser.OnEnemyGapcloser += Champion.AntiGapcloser_OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += Champion.Interrupter_OnPossibleToInterrupt;
             Obj_AI_Base.OnBuffAdd += Champion.Obj_AI_Base_OnBuffAdd;
+            Obj_AI_Base.OnProcessSpellCast += Champion.Obj_AI_Base_OnProcessSpellCast;
             #endregion
 
             ShineCommon.Maths.Prediction.Initialize();

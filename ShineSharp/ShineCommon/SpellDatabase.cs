@@ -33,11 +33,22 @@ namespace ShineCommon
         YasuoWall = 4,
     }
 
+    public struct ArcData
+    {
+        public float Width;
+        public float Height;
+        public float Radius;
+        public Vector2 Pos;
+        public float Angle;
+    }
+
     public class SpellData
     {
         public string ChampionName;
         public string SpellName;
         public SpellSlot Slot;
+        public bool IsArc;
+        public ArcData ArcData;
         public bool IsSkillshot;
         public SkillshotType Type;
         public int Delay;
@@ -72,7 +83,7 @@ namespace ShineCommon
         public static void InitalizeSpellDatabase()
         {
             EvadeableSpells = new List<SpellData>();
-            #region CC Spell Database
+            #region Dangreous Spell Database
             //diana q x axis eliptic radius 315
             EvadeableSpells.Add(
                 new SpellData
@@ -211,6 +222,33 @@ namespace ShineCommon
                     MissileSpeed = 1400,
                     IsDangerous = true,
                     MissileSpellName = "braumrmissile",
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE,
+                    Collisionable = Collisions.YasuoWall
+                });
+
+            EvadeableSpells.Add(
+                new SpellData
+                {
+                    ChampionName = "Diana",
+                    SpellName = "DianaArc",
+                    Slot = SpellSlot.Q,
+                    IsSkillshot = true,
+                    Type = SkillshotType.SkillshotCircle,
+                    Delay = 250,
+                    Range = 895,
+                    Radius = 195,
+                    IsArc = true,
+                    ArcData = new ArcData
+                        {
+                            Pos = new Vector2(875 / 2f, 20),
+                            Angle = (float)Math.PI,
+                            Width = 410,
+                            Height = 200,
+                            Radius = 120
+                        },
+                    MissileSpeed = 1600,
+                    IsDangerous = true,
+                    MissileSpellName = "DianaArc",
                     EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE,
                     Collisionable = Collisions.YasuoWall
                 });
@@ -616,6 +654,7 @@ namespace ShineCommon
                     ChampionName = "Varus",
                     SpellName = "VarusQMissilee",
                     Slot = SpellSlot.Q,
+                    IsSkillshot = true,
                     Type = SkillshotType.SkillshotLine,
                     Delay = 250,
                     Range = 1800,

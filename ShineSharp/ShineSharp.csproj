@@ -83,9 +83,12 @@
   <ItemGroup>
     <Compile Include="Champions\Amumu.cs" />
     <Compile Include="Champions\Blitzcrank.cs" />
+    <Compile Include="Champions\Diana.cs" />
     <Compile Include="Champions\Morgana.cs" />
     <Compile Include="Champions\Sivir.cs" />
-    <Compile Include="ShineCommon\Activator.cs" />
+    <Compile Include="ShineCommon\Activator\Ignite.cs" />
+    <Compile Include="ShineCommon\Activator\Smite.cs" />
+    <Compile Include="ShineCommon\Activator\Summoner.cs" />
     <Compile Include="ShineCommon\BaseChamp.cs" />
     <Compile Include="Champions\Ezreal.cs" />
     <Compile Include="ShineCommon\HookManager.cs" />

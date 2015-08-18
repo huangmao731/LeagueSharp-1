@@ -51,10 +51,10 @@ namespace ShineSharp.Champions
         public override void SetSpells()
         {
             Spells[Q] = new Spell(SpellSlot.Q, 1300f);
-            Spells[Q].SetSkillshot(0.25f, 75f, 1200f, true, SkillshotType.SkillshotLine);
+            Spells[Q].SetSkillshot(0.5f, 75f, 1200f, true, SkillshotType.SkillshotLine);
 
             Spells[W] = new Spell(SpellSlot.W, 800f);
-            Spells[W].SetSkillshot(0.50f, 400f, 2200f, false, SkillshotType.SkillshotCircle);
+            Spells[W].SetSkillshot(0.5f, 400f, 2200f, false, SkillshotType.SkillshotCircle);
 
             Spells[E] = new Spell(SpellSlot.E, 750f);
 

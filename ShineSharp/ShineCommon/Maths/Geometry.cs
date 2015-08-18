@@ -16,6 +16,12 @@ namespace ShineCommon.Maths
         {
             public List<Vector2> Points = new List<Vector2>();
 
+            public Polygon(params Polygon[] poly)
+            {
+                for (int i = 0; i < poly.Length; i++)
+                      Points.AddRange(poly[i].Points);
+            }
+
             public void Add(Vector2 point)
             {
                 Points.Add(point);
@@ -23,7 +29,7 @@ namespace ShineCommon.Maths
 
             public void Draw(int width = 1)
             {
-                for (var i = 0; i <= Points.Count - 1; i++)
+                for (var i = 0; i < Points.Count; i++)
                 {
                     var nextIndex = (Points.Count - 1 == i) ? 0 : (i + 1);
                     var start = Points[i].To3D();
@@ -138,6 +144,70 @@ namespace ShineCommon.Maths
                         result.Add(new Vector2(Center.X + outRadius * cDirection.X, Center.Y + outRadius * cDirection.Y));
                     }
 
+                    return result;
+                }
+            }
+        }
+
+        public class Arc
+        {
+            public Vector2 Center;
+            public Vector2 Direction;
+            public float Width;
+            public float Height;
+            public float Angle;
+
+            public Arc(float x, float y, Vector2 direction, float angle, float w, float h)
+            {
+                Center = new Vector2(x, y);
+                Direction = direction;
+                Angle = angle;
+                Width = w;
+                Height = h;
+            }
+
+            public Arc(Vector2 c, Vector2 direction, float angle, float w, float h)
+            {
+                Center = c;
+                Direction = direction;
+                Angle = angle;
+                Width = w;
+                Height = h;
+            }
+
+            public Polygon Polygons
+            {
+                get
+                {
+                    Polygon result = new Polygon();
+
+                    double aStep;            // Angle Step (rad)
+
+                    // Angle step in rad
+                    if (Width < Height)
+                    {
+                        if (Width < 1.0e-4)
+                            aStep = 1.0;
+                        else
+                            aStep = Math.Asin(2.0 / Width);
+                    }
+                    else
+                    {
+                        if (Height < 1.0e-4)
+                            aStep = 1.0;
+                        else
+                            aStep = Math.Asin(2.0 / Height);
+                    }
+
+                    if (aStep < 0.05)
+                        aStep = 0.05;
+
+                    Vector2 v1 = new Vector2(Center.X + (float)Math.Cos(0) * Width, Center.Y - (float)Math.Sin(0) * Height);
+                    
+                    float rotAngle = (float)Math.Atan2(Direction.Y - v1.Y, Direction.X - v1.X) - (float)(Math.PI * 180.0 / 180.0);
+                    for (double a = 0; a <= Angle; a += aStep)
+                        result.Add(new Vector2(Center.X + (float)Math.Cos(a) * Width, Center.Y - (float)Math.Sin(a) * Height).RotateAroundPoint(v1, rotAngle));
+                    
                     return result;
                 }
             }

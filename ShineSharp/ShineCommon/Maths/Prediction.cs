@@ -53,16 +53,16 @@ namespace ShineCommon.Maths
             if (!blInitialized)
                 throw new Exception("Prediction is not initalized");
 
-            float dist_target = ObjectManager.Player.ServerPosition.Distance(target.ServerPosition);
-            Vector2 Vt = (path[path.Count - 1] - path[0]).Normalized() * target.MoveSpeed;
-            Vector2 Vs = (target.ServerPosition.To2D() - ObjectManager.Player.ServerPosition.To2D()).Normalized() * s.Speed;
-            Vector2 Vr = Vs - Vt;
-
             if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || Utility.IsImmobileTarget(target))
             {
                 hc = HitChance.Immobile;
                 return target.ServerPosition.To2D() + target.Direction.To2D().Perpendicular() * s.Width / 2;
             }
+
+            float dist_target = ObjectManager.Player.ServerPosition.Distance(target.ServerPosition);
+            Vector2 Vt = (path[path.Count - 1] - path[0]).Normalized() * target.MoveSpeed;
+            Vector2 Vs = (target.ServerPosition.To2D() - ObjectManager.Player.ServerPosition.To2D()).Normalized() * s.Speed;
+            Vector2 Vr = Vs - Vt;
 
             float flytime = 0f;
              
@@ -108,6 +108,98 @@ namespace ShineCommon.Maths
 
             hc = HitChance.Impossible;
             return path[path.Count - 1];
+        }
+
+        public static Vector2 GetArcPrediction(Obj_AI_Hero target, Spell s, List<Vector2> path, float avgt, float movt, out HitChance hc)
+        {
+            if (!blInitialized)
+                throw new Exception("Prediction is not initalized");
+
+            if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || Utility.IsImmobileTarget(target))
+            {
+                hc = HitChance.Immobile;
+                return target.ServerPosition.To2D();
+            }
+
+
+            float dist_target = ObjectManager.Player.ServerPosition.Distance(target.ServerPosition);
+
+            Vector2 Vt = (path[path.Count - 1] - path[0]).Normalized() * target.MoveSpeed;
+            Vector2 Vs = (target.ServerPosition.To2D() - ObjectManager.Player.ServerPosition.To2D()).Normalized() * s.Speed;
+            Vector2 Vr = Vs - Vt;
+
+            float flytime = 0f;
+
+            if (s.Speed != 0)
+            {
+                flytime = dist_target / Vr.Length();
+
+                if (path.Count > 5)
+                    flytime = dist_target / s.Speed;
+            }
+
+            float t = flytime + s.Delay + Game.Ping / 1000f;
+            float t_ms = t * 1000f;
+
+            float distance = t * target.MoveSpeed;
+
+            if (avgt - movt >= t_ms)
+                hc = HitChance.VeryHigh;
+            else if (avgt - movt >= t_ms * 0.5f)
+                hc = HitChance.High;
+            else if (avgt - movt >= t_ms && avgt / movt >= 1.5f)
+                hc = HitChance.Medium;
+            else
+                hc = HitChance.Low;
+
+            Vector2 pos = path[path.Count - 1];
+            bool found = false;
+
+            for (int i = 1; i < path.Count; i++)
+            {
+                Vector2 sender_pos = ObjectManager.Player.ServerPosition.To2D();
+                Vector2 end_pos = path[i];
+
+
+                float multp = (end_pos.Distance(sender_pos) / 875.0f);
+
+                var diana_arc = new ShineCommon.Maths.Geometry.Polygon(
+                                ClipperWrapper.DefineArc(sender_pos - new Vector2(875 / 2f, 20), end_pos, (float)Math.PI * multp, 410, 200 * multp),
+                                ClipperWrapper.DefineArc(sender_pos - new Vector2(875 / 2f, 20), end_pos, (float)Math.PI * multp, 410, 320 * multp));
+
+                if (!ClipperWrapper.IsOutside(diana_arc, target.ServerPosition.To2D()))
+                {
+                    hc = HitChance.VeryHigh;
+                    pos = end_pos;
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                for (int i = 0; i < path.Count - 1; i++)
+                {
+                    float d = path[i + 1].Distance(path[i]);
+                    if (distance == d)
+                    {
+                        pos = path[i + 1];
+                        found = true;
+                        break;
+                    }
+                    else if (distance < d)
+                    {
+                        pos = path[i] + distance * (path[i + 1] - path[i]).Normalized();
+                        found = true;
+                        break;
+                    }
+                    else distance -= d;
+                }
+            }
+
+            if (!found)
+                hc = HitChance.Impossible;
+
+            return pos;
         }
 
         public static bool CastWithMovementCheck(this Spell s, Obj_AI_Hero t, HitChance hc = HitChance.Medium, float filter_hppercent = 0, int min_hit = 1)

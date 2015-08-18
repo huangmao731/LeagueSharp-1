@@ -8,6 +8,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using ShineCommon;
 using ShineCommon.Maths;
+using ShineCommon.Activator;
 using SharpDX;
 using SharpDX.Direct3D9;
 //typedefs
@@ -16,11 +17,11 @@ using Geometry = ShineCommon.Maths.Geometry;
 
 namespace ShineCommon
 {
-    public class BaseChamp
+    public abstract class BaseChamp
     {
         public const int Q = 0, W = 1, E = 2, R = 3;
 
-        public Menu Config, combo, ult, harass, laneclear, misc, drawing, evade, pred;
+        public Menu Config, combo, ult, harass, laneclear, misc, drawing, evade, pred, activator;
         public Orbwalking.Orbwalker Orbwalker;
         public Spell[] Spells = new Spell[4];
         public Evader m_evader;
@@ -49,9 +50,14 @@ namespace ShineCommon
             pred = new Menu("Prediction Settings", "predset");
             pred.AddItem(new MenuItem("BPREDLIST", "").SetValue(new StringList(new[] { "Shine# Prediction (recommend)", "Common Predicion" }, 0)));
 
+            activator = new Menu("Activator", "activator");
+            new Smite(TargetSelector.DamageType.Magical, activator);
+            new Ignite(TargetSelector.DamageType.Magical, activator);
+
             drawing = new Menu("Drawings", "drawings");
 
             Config.AddSubMenu(pred);
+            Config.AddSubMenu(activator);
             Config.AddSubMenu(drawing);
             SpellDatabase.InitalizeSpellDatabase();
         }
@@ -115,6 +121,11 @@ namespace ShineCommon
             //
         }
 
+        public virtual void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            //
+        }
+
         public void CastSkillshot(Obj_AI_Hero t, Spell s, HitChance hc = HitChance.High)
         {
             if (!s.IsSkillshot)
@@ -156,9 +167,9 @@ namespace ShineCommon
         }
 
         #region Damage Calculation Funcitons
-        public double CalculateComboDamage(Obj_AI_Hero target)
+        public double CalculateComboDamage(Obj_AI_Hero target, int aacount = 2)
         {
-            return CalculateSpellDamage(target) + CalculateSummonersDamage(target) + CalculateItemsDamage(target);
+            return CalculateSpellDamage(target) + CalculateSummonersDamage(target) + CalculateItemsDamage(target) + CalculateAADamage(target, aacount);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -218,7 +229,7 @@ namespace ShineCommon
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private double CalculateItemsDamage(Obj_AI_Hero target)
+        public virtual double CalculateItemsDamage(Obj_AI_Hero target)
         {
             double dmg = 0.0;
 
@@ -227,6 +238,27 @@ namespace ShineCommon
 
             if (Items.CanUseItem(3153) && ObjectManager.Player.Distance(target, false) < 550)
                 dmg += ObjectManager.Player.GetItemDamage(target, Damage.DamageItems.Botrk); //botrk
+
+            if(Items.HasItem(3057))
+                dmg += ObjectManager.Player.CalcDamage(target, Damage.DamageType.Magical, ObjectManager.Player.BaseAttackDamage); //sheen
+
+            if (Items.HasItem(3100))
+                dmg += ObjectManager.Player.CalcDamage(target, Damage.DamageType.Magical, (0.75 * ObjectManager.Player.BaseAttackDamage) + (0.50 * ObjectManager.Player.FlatMagicDamageMod)); //lich bane
+            
+            if(Items.HasItem(3285))
+                dmg += ObjectManager.Player.CalcDamage(target, Damage.DamageType.Magical, 100 + (0.1 * ObjectManager.Player.FlatMagicDamageMod)); //luden
+
+            return dmg;
+            
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public virtual double CalculateAADamage(Obj_AI_Hero target, int aacount = 2)
+        {
+            double dmg = ObjectManager.Player.GetAutoAttackDamage(target) * aacount;
+
+            if (Items.HasItem(3115))
+                dmg += ObjectManager.Player.CalcDamage(target, Damage.DamageType.Magical, 15 + (0.15 * ObjectManager.Player.FlatMagicDamageMod)); //nashor
 
             return dmg;
         }

@@ -70,7 +70,7 @@ namespace ShineCommon
             m_evade_thread.Start();
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-
+            
             Game.PrintChat("<font color='#ff3232'>Shine#: </font><font color='#d4d4d4'>Evader loaded for champion {0} !</font>", ObjectManager.Player.ChampionName);
         }
 
@@ -84,7 +84,7 @@ namespace ShineCommon
         {
             if (evade != null && evade.Item("EVADEENABLE").GetValue<bool>() && sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
             {
-                Vector2 sender_pos = sender.Position.To2D();
+                Vector2 sender_pos = sender.ServerPosition.To2D();
                 var item = evade.Items.FirstOrDefault(q => q.Name == args.SData.Name);
                 if (item != null && item.GetValue<bool>())
                 {
@@ -177,7 +177,7 @@ namespace ShineCommon
                 {
                     if (m_spell_queue.TryDequeue(out dcspell))
                     {
-                        Vector2 my_pos = ObjectManager.Player.Position.To2D();
+                        Vector2 my_pos = ObjectManager.Player.ServerPosition.To2D();
                         Vector2 sender_pos = dcspell.StartPosition;
                         Vector2 end_pos = dcspell.EndPosition;
                         Vector2 direction = (end_pos - sender_pos).Normalized();
@@ -186,17 +186,26 @@ namespace ShineCommon
 
                         Geometry.Polygon my_hitbox = ClipperWrapper.DefineRectangle(my_pos - 60, my_pos + 60, 60);
                         Geometry.Polygon spell_hitbox = null;
-                        if (dcspell.Spell.Type == SkillshotType.SkillshotLine)
+
+                        if (dcspell.Spell.IsSkillshot)
                         {
-                            spell_hitbox = ClipperWrapper.DefineRectangle(sender_pos, end_pos, dcspell.Spell.Radius);
+                            if (dcspell.Spell.Type == SkillshotType.SkillshotLine)
+                                spell_hitbox = ClipperWrapper.DefineRectangle(sender_pos, end_pos, dcspell.Spell.Radius);
+                            else if (dcspell.Spell.Type == SkillshotType.SkillshotCircle)
+                                spell_hitbox = ClipperWrapper.DefineCircle(end_pos, dcspell.Spell.Radius);
+                            else if (dcspell.Spell.Type == SkillshotType.SkillshotCone)
+                                spell_hitbox = ClipperWrapper.DefineSector(sender_pos, end_pos - sender_pos, dcspell.Spell.Radius * (float)Math.PI / 180, dcspell.Spell.Range);
                         }
-                        else if (dcspell.Spell.Type == SkillshotType.SkillshotCircle)
+
+                        //spells with arc
+                        if (dcspell.Spell.IsArc)
                         {
-                            spell_hitbox = ClipperWrapper.DefineCircle(end_pos, dcspell.Spell.Radius);
-                        }
-                        else if (dcspell.Spell.Type == SkillshotType.SkillshotCone)
-                        {
-                            spell_hitbox = ClipperWrapper.DefineSector(sender_pos, end_pos - sender_pos, dcspell.Spell.Radius * (float)Math.PI / 180, dcspell.Spell.Range);
+                            float mul = (end_pos.Distance(sender_pos) / (dcspell.Spell.Range - 20.0f));
+                            
+                            spell_hitbox = new Geometry.Polygon(
+                                ClipperWrapper.DefineArc(sender_pos - dcspell.Spell.ArcData.Pos, end_pos, dcspell.Spell.ArcData.Angle * mul, dcspell.Spell.ArcData.Width, dcspell.Spell.ArcData.Height * mul),
+                                ClipperWrapper.DefineArc(sender_pos - dcspell.Spell.ArcData.Pos, end_pos, dcspell.Spell.ArcData.Angle * mul, dcspell.Spell.ArcData.Width, (dcspell.Spell.ArcData.Height + dcspell.Spell.ArcData.Radius) * mul),
+                                spell_hitbox);
                         }
 
                         if (spell_hitbox != null)
