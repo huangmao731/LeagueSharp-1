@@ -136,6 +136,16 @@ namespace ShineSharp.Champions
                         if (!m_target.IsDead)
                             Spells[E].Cast();
                     }
+                    else
+                    {
+                        if (HasMoonlight(m_target))
+                        {
+                            if (!m_target.IsDead)
+                                Spells[R].CastOnUnit(m_target);
+                            if (!m_target.IsDead)
+                                Spells[E].Cast();
+                        }
+                    }
                     m_misaya_start_tick = 0;
                 }
             }
