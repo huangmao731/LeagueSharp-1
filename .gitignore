@@ -230,3 +230,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 ShineSharp/ShineSharp.csproj
+ShineSharp/Champions/Zed.cs
+*.rar

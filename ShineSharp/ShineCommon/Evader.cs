@@ -82,29 +82,32 @@ namespace ShineCommon
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (evade != null && evade.Item("EVADEENABLE").GetValue<bool>() && sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy)
+            if (evade != null && evade.Item("EVADEENABLE").GetValue<bool>() && sender.Type == GameObjectType.obj_AI_Hero)
             {
-                Vector2 sender_pos = sender.ServerPosition.To2D();
-                var item = evade.Items.FirstOrDefault(q => q.Name == args.SData.Name);
-                if (item != null && item.GetValue<bool>())
+                if (sender.IsEnemy)
                 {
-                    var spell = SpellDatabase.EvadeableSpells.FirstOrDefault(p => p.SpellName == args.SData.Name);
-                    if (spell != null)
+                    Vector2 sender_pos = sender.ServerPosition.To2D();
+                    var item = evade.Items.FirstOrDefault(q => q.Name == args.SData.Name);
+                    if (item != null && item.GetValue<bool>())
                     {
-                        if (spell.IsSkillshot)
+                        var spell = SpellDatabase.EvadeableSpells.FirstOrDefault(p => p.SpellName == args.SData.Name);
+                        if (spell != null)
                         {
-                            DetectedSpellData dcspell = m_spell_pool.GetObject();
-                            dcspell.Set(spell, sender_pos, args.End.To2D(), sender, args);
-                            m_spell_queue.Enqueue(dcspell);
+                            if (spell.IsSkillshot)
+                            {
+                                DetectedSpellData dcspell = m_spell_pool.GetObject();
+                                dcspell.Set(spell, sender_pos, args.End.To2D(), sender, args);
+                                m_spell_queue.Enqueue(dcspell);
+                            }
                         }
                     }
-                }
 
-                //to do: ally check
-                if (item == null && args.Target != null && args.Target.IsMe && args != null && args.SData != null && !args.SData.IsAutoAttack() && sender.IsChampion())
-                {
-                    if(sender.GetSpellDamage(ObjectManager.Player, args.SData.Name) * 2 >= ObjectManager.Player.Health)
-                        OnSpellHitDetected(sender_pos, ObjectManager.Player);
+                    //to do: ally check
+                    if (item == null && args.Target != null && args.Target.IsMe && args != null && args.SData != null && !args.SData.IsAutoAttack() && sender.IsChampion())
+                    {
+                        if (sender.GetSpellDamage(ObjectManager.Player, args.SData.Name) * 2 >= ObjectManager.Player.Health)
+                            OnSpellHitDetected(sender_pos, ObjectManager.Player);
+                    }
                 }
             }
         }
@@ -120,12 +123,18 @@ namespace ShineCommon
                 Console.WriteLine("try evade with data Targetted: {0}, SelfCast: {1}, TargetName: {2}", edata.IsTargetted, edata.IsSelfCast, edata.Target.Name);
                 if (EvadeSpell.IsReady())
                 {
-                    if (edata.IsSelfCast)
-                        EvadeSpell.Cast();
-                    else if (edata.IsTargetted && edata.Target != null)
-                        EvadeSpell.Cast(edata.Target);
-                    else
-                        EvadeSpell.Cast(edata.Position);
+                    if ((SpecialMethod == EvadeMethods.ZedW && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "ZedShadowDash") || SpecialMethod != EvadeMethods.ZedW)
+                    {
+                        if (edata.IsSelfCast)
+                            EvadeSpell.Cast();
+                        else if (edata.IsTargetted && edata.Target != null)
+                            EvadeSpell.Cast(edata.Target);
+                        else
+                            EvadeSpell.Cast(edata.Position);
+
+                        if (SpecialMethod == EvadeMethods.ZedW)
+                            EvadeSpell.CastWithDelay(100);
+                    }
                 }
             }
         }

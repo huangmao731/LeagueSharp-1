@@ -20,8 +20,9 @@ namespace ShineCommon
         LissandraR = 64,
         NocturneW = 128,
         VladimirW = 256,
-        QSS = 512,
-        None = 1024,
+        ZedW = 512,
+        QSS = 1024,
+        None = 2048,
     }
 
     [Flags]

@@ -32,6 +32,7 @@ namespace MoonDiana
             //
             ult = new Menu("R Settings", "rsettings");
             ult.AddItem(new MenuItem("CUSER", "Use R").SetValue(true));
+            ult.AddItem(new MenuItem("CUSERTOWER", "Dont Use R If Enemy is Under Tower").SetValue(false));
             ult.AddItem(new MenuItem("CUSERMETHOD", "R Method").SetValue<StringList>(new StringList(new string[] { "Use Smart R", "Use Only R To Moonlight Debuffed", "Use R Always" }, 0)));
             //
             combo.AddSubMenu(ult);
@@ -281,7 +282,7 @@ namespace MoonDiana
             {
                 if (m_target != null && Config.Item("CUSERMETHOD").GetValue<StringList>().SelectedIndex != 2 && Spells[R].IsReady())
                 {
-                    if (Spells[R].IsInRange(m_target))
+                    if (Spells[R].IsInRange(m_target) && ((m_target.UnderTurret() && !Config.Item("CUSERTOWER").GetValue<bool>()) || !m_target.UnderTurret()))
                     {
                         Spells[R].CastOnUnit(m_target);
                         if (!m_target.IsDead && Spells[W].IsReady() && Config.Item("CUSEW").GetValue<bool>()) //overkill check
@@ -291,7 +292,7 @@ namespace MoonDiana
                         {
                             if (Config.Item("CUSERMETHOD").GetValue<StringList>().SelectedIndex != 1)
                             {
-                                if (Spells[R].IsReady())
+                                if (Spells[R].IsReady() && ((m_target.UnderTurret() && !Config.Item("CUSERTOWER").GetValue<bool>()) || !m_target.UnderTurret()))
                                 {
                                     Spells[R].CastOnUnit(m_target);
                                     m_target = null;
@@ -315,7 +316,8 @@ namespace MoonDiana
                         if (Config.Item("CUSERMETHOD").GetValue<StringList>().SelectedIndex == 2 || (Config.Item("CUSERMETHOD").GetValue<StringList>().SelectedIndex == 0 && CalculateDamageR(t) >= t.Health))
                         {
                             m_target = t;
-                            Spells[R].CastOnUnit(t);
+                            if(((m_target.UnderTurret() && !Config.Item("CUSERTOWER").GetValue<bool>()) || !m_target.UnderTurret()))
+                                Spells[R].CastOnUnit(t);
                         }
                     }
                 }
@@ -367,7 +369,7 @@ namespace MoonDiana
             {
                 if (m_target != null)
                 {
-                    if (m_target.ServerPosition.CountEnemiesInRange(600) == 1 && Spells[R].IsInRange(m_target) && HasMoonlight(m_target))
+                    if (m_target.ServerPosition.CountEnemiesInRange(600) == 1 && Spells[R].IsInRange(m_target) && HasMoonlight(m_target) && !m_target.UnderTurret())
                     {
                         Spells[R].CastOnUnit(m_target);
 

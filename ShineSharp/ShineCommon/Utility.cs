@@ -70,5 +70,17 @@ namespace ShineCommon
         {
             return ObjectManager.Player.Spellbook.GetSpell(s.Slot).ToggleState == 2;
         }
+
+        public static async Task CastWithDelay(this Spell s, int delay)
+        {
+            System.Threading.Thread.Sleep(delay);
+            s.Cast();
+        }
+
+        public static async Task DelayAction(Action act, int delay = 1)
+        {
+            System.Threading.Thread.Sleep(delay);
+            act();
+        }
     }
 }
