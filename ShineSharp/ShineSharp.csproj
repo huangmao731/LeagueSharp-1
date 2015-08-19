@@ -86,7 +86,6 @@
     <Compile Include="Champions\Diana.cs" />
     <Compile Include="Champions\Morgana.cs" />
     <Compile Include="Champions\Sivir.cs" />
-    <Compile Include="Champions\Zed.cs" />
     <Compile Include="ShineCommon\Activator\Ignite.cs" />
     <Compile Include="ShineCommon\Activator\Smite.cs" />
     <Compile Include="ShineCommon\Activator\Summoner.cs" />
