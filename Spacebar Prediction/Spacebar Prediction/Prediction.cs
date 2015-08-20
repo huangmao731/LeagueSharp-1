@@ -417,7 +417,7 @@ namespace SPrediction
             /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
             /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
             /// <returns>true if spell has casted</returns>
-            public static bool SPredictionCast(Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 2, Vector3? rangeCheckFrom = null, float filterHPPercent = 0)
+            internal static bool SPredictionCast(Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 2, Vector3? rangeCheckFrom = null, float filterHPPercent = 0)
             {
                 if (!blInitialized)
                     throw new Exception("Prediction is not initalized");
@@ -860,12 +860,12 @@ namespace SPrediction
         #endregion
 
         #region util funcs
-        private static bool IsImmobilizeBuff(BuffType type)
+        internal static bool IsImmobilizeBuff(BuffType type)
         {
             return type == BuffType.Snare || type == BuffType.Stun || type == BuffType.Charm || type == BuffType.Knockup || type == BuffType.Suppression;
         }
 
-        private static bool IsImmobileTarget(Obj_AI_Hero target)
+        internal static bool IsImmobileTarget(Obj_AI_Hero target)
         {
             return target.Buffs.Count(p => IsImmobilizeBuff(p.Type)) > 0 || target.IsChannelingImportantSpell();
         }
