@@ -38,6 +38,7 @@ namespace SPrediction
         /// <returns>true if collision found</returns>
         public bool CheckCollision(Vector2 from, Vector2 to, float width = 1f, bool checkMinion = true, bool checkHero = false, bool checkYasuoWall = true, bool checkHeroAlly = false, bool checkWall = false)
         {
+            Console.WriteLine(CheckMinionCollision(from, to, width));
             return  ((checkMinion && CheckMinionCollision(from, to, width)) || !checkMinion) &&
                     ((checkHero && CheckHeroCollision(from, to, width, checkHeroAlly)) || !checkHero) &&
                     ((checkYasuoWall && CheckYasuoWallCollision(from, to, width)) || !checkYasuoWall) &&

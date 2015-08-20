@@ -309,7 +309,7 @@ namespace SPrediction
                         return false;
                     }
 
-                    if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s.Width, true, true, true))
+                    if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s.Width, true, false, true))
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
