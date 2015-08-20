@@ -243,7 +243,7 @@ namespace MoonDiana
                     if (Spells[Q].IsReady() && !m_target.IsDead)
                     {
                         HitChance hc;
-                        Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(m_target, Spells[Q], m_target.GetWaypoints(), m_target.AvgMovChangeTime() + 100, m_target.LastMovChangeTime(), out hc);
+                        Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(m_target, Spells[Q], m_target.GetWaypoints(), m_target.AvgMovChangeTime() + 100, m_target.LastMovChangeTime(), out hc, ObjectManager.Player.ServerPosition);
                         if (hc >= HitChance.High)
                             Spells[Q].Cast(pos);
                     }
@@ -269,7 +269,7 @@ namespace MoonDiana
                 if (t != null)
                 {
                     HitChance hc;
-                    Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(t, Spells[Q], t.GetWaypoints(), t.AvgMovChangeTime(), t.LastMovChangeTime(), out hc);
+                    Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(t, Spells[Q], t.GetWaypoints(), t.AvgMovChangeTime(), t.LastMovChangeTime(), out hc, ObjectManager.Player.ServerPosition);
                     if (hc >= HitChance.VeryHigh)
                         Spells[Q].Cast(pos);
                 }
@@ -356,7 +356,7 @@ namespace MoonDiana
                 if (t != null)
                 {
                     HitChance hc;
-                    Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(t, Spells[Q], t.GetWaypoints(), t.AvgMovChangeTime() + 100, t.LastMovChangeTime(), out hc);
+                    Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(t, Spells[Q], t.GetWaypoints(), t.AvgMovChangeTime() + 100, t.LastMovChangeTime(), out hc, ObjectManager.Player.ServerPosition);
                     if (hc >= HitChance.VeryHigh)
                         Spells[Q].Cast(pos);
                 }

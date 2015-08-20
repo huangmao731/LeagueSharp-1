@@ -169,7 +169,7 @@ namespace ShineCommon
                     if (s.IsReady())
                     {
                         if (pred.Item("BPREDLIST").GetValue<StringList>().SelectedIndex == 0)
-                            s.CastWithMovementCheck(t, hc);
+                            s.Cast(t, hc);
                         else
                             s.Cast(p.CastPosition);
                     }
