@@ -318,7 +318,7 @@ namespace SPrediction
 
                     lastDrawTick = Utils.TickCount;
                     lastDrawPos = pos;
-                    lastDrawHitchance = (int)(100f / (HitChance.Immobile - HitChance.Impossible)) * (hc - HitChance.Impossible);
+                    lastDrawHitchance = (int)(100f / (HitChance.VeryHigh - HitChance.Impossible)) * (hc - HitChance.Impossible);
                     lastDrawDirection = (pos - rangeCheckFrom.Value.To2D()).Normalized().Perpendicular();
                     lastDrawWidth = (int)s.Width;
 
@@ -858,8 +858,8 @@ namespace SPrediction
                 if (Utils.TickCount - lastDrawTick <= 2000)
                 {
                     Vector2 centerPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * 5).To3D());
-                    Vector2 startPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * lastDrawWidth / 2).To3D());
-                    Vector2 endPos = Drawing.WorldToScreen((lastDrawPos + lastDrawDirection * lastDrawWidth / 2).To3D());
+                    Vector2 startPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * lastDrawWidth).To3D());
+                    Vector2 endPos = Drawing.WorldToScreen((lastDrawPos + lastDrawDirection * lastDrawWidth).To3D());
                     Drawing.DrawLine(startPos, endPos, 2, System.Drawing.Color.Gold);
                     Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, lastDrawHitchance.ToString());
                 }
