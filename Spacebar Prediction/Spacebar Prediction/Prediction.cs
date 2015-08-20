@@ -860,8 +860,8 @@ namespace SPrediction
                     Vector2 centerPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * 5).To3D());
                     Vector2 startPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * lastDrawWidth).To3D());
                     Vector2 endPos = Drawing.WorldToScreen((lastDrawPos + lastDrawDirection * lastDrawWidth).To3D());
-                    Drawing.DrawLine(startPos, endPos, 2, System.Drawing.Color.Gold);
-                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, lastDrawHitchance.ToString());
+                    Drawing.DrawLine(startPos, endPos, 3, System.Drawing.Color.Gold);
+                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, "%" + lastDrawHitchance.ToString());
                 }
             }
         }
