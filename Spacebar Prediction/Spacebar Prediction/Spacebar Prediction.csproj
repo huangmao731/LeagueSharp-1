@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClipperWrapper.cs" />
+    <Compile Include="Collision.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Prediction.cs" />
     <Compile Include="Program.cs" />

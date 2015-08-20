@@ -38,6 +38,7 @@ namespace SPrediction
         public static Dictionary<int, EnemyData> EnemyInfo = new Dictionary<int, EnemyData>();
         private static bool blInitialized;
         private static Menu predMenu;
+        private static SPrediction.Collision Collision;
 
         /// <summary>
         /// Initializes Prediction Services
@@ -56,6 +57,8 @@ namespace SPrediction
                 predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 mainMenu.AddSubMenu(predMenu);
             }
+
+            Collision = new SPrediction.Collision();
 
             blInitialized = true;
         }
@@ -170,7 +173,7 @@ namespace SPrediction
             #region arc collision test
             for (int i = 1; i < path.Count; i++)
             {
-                Vector2 senderPos = ObjectManager.Player.ServerPosition.To2D();
+                Vector2 senderPos = rangeCheckFrom.To2D();
                 Vector2 testPos = path[i];
 
                 float multp = (testPos.Distance(senderPos) / 875.0f);
@@ -303,7 +306,7 @@ namespace SPrediction
                         return false;
                     }
 
-                    if (s.Collision && s.GetCollision(rangeCheckFrom.Value.To2D(), new List<Vector2> { pos }).Exists(q => q.IsEnemy)) //needs update
+                    if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s.Width, true, true, true))
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
@@ -369,7 +372,13 @@ namespace SPrediction
                         return false;
                     }
 
-                    if (s.Collision && s.GetCollision(rangeCheckFrom.Value.To2D(), new List<Vector2> { pos }).Exists(q => q.IsEnemy)) //needs update
+                    float multp = (pos.Distance(rangeCheckFrom.Value.To2D()) / 875.0f);
+
+                    var dianaArc = new SPrediction.Geometry.Polygon(
+                                    ClipperWrapper.DefineArc(rangeCheckFrom.Value.To2D() - new Vector2(875 / 2f, 20), pos, (float)Math.PI * multp, 410, 200 * multp),
+                                    ClipperWrapper.DefineArc(rangeCheckFrom.Value.To2D() - new Vector2(875 / 2f, 20), pos, (float)Math.PI * multp, 410, 320 * multp));
+
+                    if (Collision.CheckYasuoWallCollision(dianaArc))
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
@@ -433,14 +442,6 @@ namespace SPrediction
                             case SkillshotType.SkillshotCone: pos = Cone.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
                                 break;
                         }
-
-                        //pos = pos + pos.Perpendicular() * s.Width / 2; //need moar test (for lineaar skillshots)
-                        if (s.Collision && s.GetCollision(rangeCheckFrom.Value.To2D(), new List<Vector2> { pos }).Exists(q => q.IsEnemy)) //needs update
-                        {
-                            Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
-                            return false;
-                        }
-
 
                         if (predictedhc >= hc)
                         {
