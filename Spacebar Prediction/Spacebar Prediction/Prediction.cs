@@ -40,6 +40,12 @@ namespace SPrediction
         private static Menu predMenu;
         private static SPrediction.Collision Collision;
 
+        private static int lastDrawHitchance;
+        private static Vector2 lastDrawPos;
+        private static Vector2 lastDrawDirection;
+        private static int lastDrawTick;
+        private static int lastDrawWidth;
+
         /// <summary>
         /// Initializes Prediction Services
         /// </summary>
@@ -55,11 +61,12 @@ namespace SPrediction
                 predMenu = new Menu("SPrediction", "SPRED");
                 predMenu.AddItem(new MenuItem("PREDICTONLIST", "Prediction Method").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
                 predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
+                predMenu.AddItem(new MenuItem("SPREDDRAWINGS", "Enable Drawings").SetValue(true));
                 mainMenu.AddSubMenu(predMenu);
             }
 
             Collision = new SPrediction.Collision();
-
+            Drawing.OnDraw += Drawing_OnDraw;
             blInitialized = true;
         }
 
@@ -309,8 +316,15 @@ namespace SPrediction
                         return false;
                     }
 
+                    lastDrawTick = Utils.TickCount;
+                    lastDrawPos = pos;
+                    lastDrawHitchance = (int)(100f / (HitChance.Immobile - HitChance.Impossible)) * (hc - HitChance.Impossible);
+                    lastDrawDirection = (pos - rangeCheckFrom.Value.To2D()).Normalized().Perpendicular();
+                    lastDrawWidth = (int)s.Width;
+
                     if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s.Width, true, false, true))
                     {
+                        lastDrawHitchance = 0;
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
                     }
@@ -817,6 +831,35 @@ namespace SPrediction
                 }
 
                 EnemyInfo[sender.NetworkId] = enemy;
+            }
+        }
+
+        private static void Drawing_OnDraw(EventArgs args)
+        {
+            if (predMenu.Item("SPREDDRAWINGS").GetValue<bool>())
+            {
+                foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
+                {
+                    var waypoints = enemy.GetWaypoints();
+                    for (int i = 0; i < waypoints.Count - 1; i++)
+                    {
+                        Vector2 posFrom = Drawing.WorldToScreen(waypoints[i].To3D());
+                        Vector2 posTo = Drawing.WorldToScreen(waypoints[i + 1].To3D());
+                        Drawing.DrawLine(posFrom, posTo, 2, System.Drawing.Color.Aqua);
+                    }
+
+                    Vector2 pos = Drawing.WorldToScreen(waypoints[waypoints.Count - 1].To3D());
+                    Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Black, (waypoints.PathLength() / enemy.MoveSpeed).ToString("0.00")); //arrival time
+                }
+
+                if (Utils.TickCount - lastDrawTick <= 2000)
+                {
+                    Vector2 centerPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * 5).To3D());
+                    Vector2 startPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * lastDrawWidth / 2).To3D());
+                    Vector2 endPos = Drawing.WorldToScreen((lastDrawPos + lastDrawDirection * lastDrawWidth / 2).To3D());
+                    Drawing.DrawLine(startPos, endPos, 2, System.Drawing.Color.Gold);
+                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, lastDrawHitchance.ToString());
+                }
             }
         }
 
