@@ -841,15 +841,18 @@ namespace SPrediction
                 foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
                 {
                     var waypoints = enemy.GetWaypoints();
-                    for (int i = 0; i < waypoints.Count - 1; i++)
+                    if (waypoints != null && waypoints.Count > 1)
                     {
-                        Vector2 posFrom = Drawing.WorldToScreen(waypoints[i].To3D());
-                        Vector2 posTo = Drawing.WorldToScreen(waypoints[i + 1].To3D());
-                        Drawing.DrawLine(posFrom, posTo, 2, System.Drawing.Color.Aqua);
-                    }
+                        for (int i = 0; i < waypoints.Count - 1; i++)
+                        {
+                            Vector2 posFrom = Drawing.WorldToScreen(waypoints[i].To3D());
+                            Vector2 posTo = Drawing.WorldToScreen(waypoints[i + 1].To3D());
+                            Drawing.DrawLine(posFrom, posTo, 2, System.Drawing.Color.Aqua);
+                        }
 
-                    Vector2 pos = Drawing.WorldToScreen(waypoints[waypoints.Count - 1].To3D());
-                    Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Black, (waypoints.PathLength() / enemy.MoveSpeed).ToString("0.00")); //arrival time
+                        Vector2 pos = Drawing.WorldToScreen(waypoints[waypoints.Count - 1].To3D());
+                        Drawing.DrawText(pos.X, pos.Y, System.Drawing.Color.Black, (waypoints.PathLength() / enemy.MoveSpeed).ToString("0.00")); //arrival time
+                    }
                 }
 
                 if (Utils.TickCount - lastDrawTick <= 2000)
