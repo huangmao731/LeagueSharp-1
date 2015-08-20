@@ -31,7 +31,7 @@ using Paths = System.Collections.Generic.List<System.Collections.Generic.List<Cl
 
 namespace SPrediction
 {
-    public static class ClipperWrapper
+    internal static class ClipperWrapper
     {
         /// <summary>
         /// Checks if polygons are intersecting

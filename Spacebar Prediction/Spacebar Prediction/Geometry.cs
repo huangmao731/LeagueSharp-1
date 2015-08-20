@@ -59,7 +59,7 @@ namespace SPrediction
             }
         }
 
-        public class Circle
+        internal class Circle
         {
             private const int CircleLineSegmentN = 22;
             public Vector2 Center;
@@ -97,7 +97,7 @@ namespace SPrediction
             }
         }
 
-        public class Rectangle
+        internal class Rectangle
         {
             public Vector2 Direction;
             public Vector2 Perpendicular;
@@ -130,7 +130,7 @@ namespace SPrediction
             }
         }
 
-        public class Sector
+        internal class Sector
         {
             private const int CircleLineSegmentN = 22;
             public float Angle;
@@ -170,7 +170,7 @@ namespace SPrediction
         /// <summary>
         /// Arc class
         /// </summary>
-        public class Arc
+        internal class Arc
         {
             public Vector2 Center;
             public Vector2 Direction;

@@ -19,7 +19,7 @@ namespace SPrediction
         /// <summary>
         /// Constructor
         /// </summary>
-        public void Collision()
+        public Collision()
         {
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
         }
