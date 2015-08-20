@@ -99,7 +99,7 @@ namespace ShineSharp.Champions
         {
             #region Auto Harass
 
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value >= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100 && !ObjectManager.Player.UnderTurret())
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value <= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100 && !ObjectManager.Player.UnderTurret())
             {
                 var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Config.Item("MAUTOQRANGE").GetValue<Slider>().Value) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
                 if (t != null && !Config.Item("noautograb" + t.ChampionName).GetValue<bool>())
