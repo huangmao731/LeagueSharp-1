@@ -318,7 +318,7 @@ namespace SPrediction
 
                     lastDrawTick = Utils.TickCount;
                     lastDrawPos = pos;
-                    lastDrawHitchance = (int)(100f / (HitChance.VeryHigh - HitChance.Impossible)) * (hc - HitChance.Impossible);
+                    lastDrawHitchance = (int)(100f / (HitChance.VeryHigh - HitChance.Impossible)) * (predictedhc - HitChance.Impossible);
                     lastDrawDirection = (pos - rangeCheckFrom.Value.To2D()).Normalized().Perpendicular();
                     lastDrawWidth = (int)s.Width;
 
@@ -328,7 +328,6 @@ namespace SPrediction
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
                     }
-
 
                     if (predictedhc >= hc)
                     {
