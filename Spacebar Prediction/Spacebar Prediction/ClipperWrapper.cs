@@ -11,7 +11,7 @@ using ClipperLib;
 using Path = System.Collections.Generic.List<ClipperLib.IntPoint>;
 using Paths = System.Collections.Generic.List<System.Collections.Generic.List<ClipperLib.IntPoint>>;
 
-namespace ShineCommon.Maths
+namespace SPrediction
 {
     public static class ClipperWrapper
     {
@@ -27,7 +27,7 @@ namespace ShineCommon.Maths
             Paths solution = new Paths();
             c.AddPaths(p1, PolyType.ptSubject, true);
 
-            for(int i = 0; i < p2.Length; i++)
+            for (int i = 0; i < p2.Length; i++)
                 c.AddPaths(p2[i], PolyType.ptClip, true);
 
             c.Execute(ClipType.ctIntersection, solution, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);

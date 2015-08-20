@@ -148,15 +148,15 @@ namespace ShineSharp.Champions
                     HitChance ulthc = ShineCommon.Utility.HitchanceArray[Config.Item("CRHITCHANCE").GetValue<StringList>().SelectedIndex];
                     if (Config.Item("CUSEHPHIT").GetValue<bool>())
                     {
-                        if (Spells[R].CastWithMovementCheck(t, ulthc, Config.Item("CUSERHP").GetValue<Slider>().Value, Config.Item("CUSERHIT").GetValue<Slider>().Value))
+                        if (Spells[R].Cast(t, ulthc, Config.Item("CUSERHIT").GetValue<Slider>().Value, null, Config.Item("CUSERHP").GetValue<Slider>().Value))
                             return;
                     }
 
                     if (t.Health / t.MaxHealth * 100 <= Config.Item("CUSERHP").GetValue<Slider>().Value)
-                        if (Spells[R].CastWithMovementCheck(t, ulthc))
+                        if (Spells[R].Cast(t, ulthc))
                             return;
 
-                    Spells[R].CastWithMovementCheck(t, ulthc, 0, Config.Item("CUSERHIT").GetValue<Slider>().Value);
+                    Spells[R].Cast(t, ulthc, Config.Item("CUSERHIT").GetValue<Slider>().Value, null, 100);
                 }
             }
         }

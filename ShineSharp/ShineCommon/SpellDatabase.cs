@@ -100,7 +100,7 @@ namespace ShineCommon
                     MissileSpeed = 1550,
                     IsDangerous = true,
                     MissileSpellName = "AhriSeduceMissile",
-                    EvadeMethods =  EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods =  EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.Minions | Collisions.YasuoWall 
                 });
 
@@ -118,7 +118,7 @@ namespace ShineCommon
                     MissileSpeed = 2000,
                     IsDangerous = true,
                     MissileSpellName = "SadMummyBandageToss",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.Minions | Collisions.YasuoWall
 
                 });
@@ -170,7 +170,7 @@ namespace ShineCommon
                     MissileSpeed = 1600,
                     IsDangerous = true,
                     MissileSpellName = "EnchantedCrystalArrow",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.YasuoWall
                 });
 
@@ -205,7 +205,7 @@ namespace ShineCommon
                     MissileSpeed = 1800,
                     IsDangerous = true,
                     MissileSpellName = "RocketGrabMissile",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.YasuoWall
                 });
 
@@ -286,7 +286,7 @@ namespace ShineCommon
                     MissileSpeed = 1600,
                     IsDangerous = true,
                     MissileSpellName = "EliseHumanE",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.ZedW,
                     Collisionable = Collisions.YasuoWall
                 });
 
@@ -321,7 +321,7 @@ namespace ShineCommon
                     MissileSpeed = int.MaxValue,
                     IsDangerous = true,
                     MissileSpellName = "CassiopeiaPetrifyingGaze",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.ZedW
                 });
 
             EvadeableSpells.Add(
@@ -339,7 +339,7 @@ namespace ShineCommon
                     IsDangerous = true,
                     MissileSpellName = "FizzMarinerDoomMissile",
                     Collisionable = Collisions.Champions | Collisions.YasuoWall,
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.ZedW
                 });
 
             EvadeableSpells.Add(
@@ -429,7 +429,7 @@ namespace ShineCommon
                     IsDangerous = true,
                     MissileSpellName = "GravesChargeShotShot",
                     Collisionable = Collisions.YasuoWall,
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE 
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.ZedW
                 });
 
             EvadeableSpells.Add(
@@ -464,7 +464,7 @@ namespace ShineCommon
                     IsDangerous = true,
                     MissileSpellName = "LeonaZenithBladeMissile",
                     Collisionable = Collisions.YasuoWall,
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW
                 });
 
             EvadeableSpells.Add(
@@ -481,7 +481,7 @@ namespace ShineCommon
                     MissileSpeed = 1500,
                     IsDangerous = true,
                     MissileSpellName = "UFSlash",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.ZedW
                 });
 
             EvadeableSpells.Add(
@@ -498,7 +498,7 @@ namespace ShineCommon
                     MissileSpeed = 1200,
                     IsDangerous = true,
                     MissileSpellName = "DarkBindingMissile",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.Minions | Collisions.YasuoWall
                 });
 
@@ -535,7 +535,7 @@ namespace ShineCommon
                     MissileSpeed = 2000,
                     IsDangerous = true,
                     MissileSpellName = "NautilusAnchorDragMissile",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.Minions | Collisions.YasuoWall
                 });
 
@@ -554,7 +554,7 @@ namespace ShineCommon
                     MissileSpeed = 1500,
                     IsDangerous = true,
                     MissileSpellName = "RengarEFinal",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.Minions | Collisions.YasuoWall
                 });
 
@@ -573,7 +573,7 @@ namespace ShineCommon
                     MissileSpeed = 2400,
                     IsDangerous = true,
                     MissileSpellName = "SonaR",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.YasuoWall
                 });
 
@@ -610,7 +610,7 @@ namespace ShineCommon
                     MissileSpeed = 1601,
                     IsDangerous = false,
                     MissileSpellName = "syndrae5",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW
                 });
 
             EvadeableSpells.Add(
@@ -627,7 +627,7 @@ namespace ShineCommon
                     MissileSpeed = 1601,
                     IsDangerous = false,
                     MissileSpellName = "SyndraE",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                 });
 
             EvadeableSpells.Add(
@@ -644,7 +644,7 @@ namespace ShineCommon
                     MissileSpeed = 1900,
                     IsDangerous = true,
                     MissileSpellName = "ThreshQMissile",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.Minions | Collisions.YasuoWall
                 });
 
@@ -663,7 +663,7 @@ namespace ShineCommon
                     MissileSpeed = 1900,
                     IsDangerous = false,
                     MissileSpellName = "VarusQMissile",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.ZedW,
                     Collisionable = Collisions.YasuoWall
                 });
 
@@ -681,7 +681,7 @@ namespace ShineCommon
                     MissileSpeed = 1950,
                     IsDangerous = true,
                     MissileSpellName = "VarusRMissile",
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                     Collisionable = Collisions.Champions | Collisions.YasuoWall
                 });
 
@@ -717,7 +717,7 @@ namespace ShineCommon
                     IsDangerous = true,
                     MissileSpellName = "yasuoq3w",
                     Collisionable = Collisions.YasuoWall,
-                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS,
+                    EvadeMethods = EvadeMethods.EzrealE | EvadeMethods.SivirE | EvadeMethods.MorganaE | EvadeMethods.QSS | EvadeMethods.ZedW,
                 });
 
             EvadeableSpells.Add(

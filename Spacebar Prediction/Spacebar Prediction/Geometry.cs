@@ -7,7 +7,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace ShineCommon.Maths
+namespace SPrediction
 {
     public static class Geometry
     {
@@ -19,7 +19,7 @@ namespace ShineCommon.Maths
             public Polygon(params Polygon[] poly)
             {
                 for (int i = 0; i < poly.Length; i++)
-                      Points.AddRange(poly[i].Points);
+                    Points.AddRange(poly[i].Points);
             }
 
             public void Add(Vector2 point)
@@ -206,11 +206,11 @@ namespace ShineCommon.Maths
                         aStep = 0.05;
 
                     Vector2 v1 = new Vector2(Center.X + (float)Math.Cos(0) * Width, Center.Y - (float)Math.Sin(0) * Height);
-                    
+
                     float rotAngle = (float)Math.Atan2(Direction.Y - v1.Y, Direction.X - v1.X) - (float)(Math.PI * 180.0 / 180.0);
                     for (double a = 0; a <= Angle; a += aStep)
                         result.Add(new Vector2(Center.X + (float)Math.Cos(a) * Width, Center.Y - (float)Math.Sin(a) * Height).RotateAroundPoint(v1, rotAngle));
-                    
+
                     return result;
                 }
             }

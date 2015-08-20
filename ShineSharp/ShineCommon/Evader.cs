@@ -144,7 +144,7 @@ namespace ShineCommon
             EvadeData edata;
 
             Vector2 evade_direction = direction.Perpendicular();
-            Vector2 evade_pos = ObjectManager.Player.ServerPosition.To2D() + direction.Perpendicular() * EvadeSpell.Range;
+            Vector2 evade_pos = ObjectManager.Player.ServerPosition.To2D() + evade_direction * EvadeSpell.Range;
 
             bool position_needed = !(SpecialMethod.HasFlag(EvadeMethods.MorganaE) || SpecialMethod.HasFlag(EvadeMethods.LissandraR) || SpecialMethod.HasFlag(EvadeMethods.KayleR) || SpecialMethod.HasFlag(EvadeMethods.SivirE) || SpecialMethod.HasFlag(EvadeMethods.NocturneW) || SpecialMethod.HasFlag(EvadeMethods.VladimirW));
 
@@ -153,16 +153,16 @@ namespace ShineCommon
                 switch (evade.Item("EVADEMETHOD").GetValue<StringList>().SelectedIndex)
                 {
                     case 0: //near turret
-                        CorrectNearTurret(ref evade_pos, evade_direction.Perpendicular());
+                        CorrectNearTurret(ref evade_pos, evade_direction);
                         break;
 
                     case 1: //less enemies
-                        CorrectLessEnemies(ref evade_pos, evade_direction.Perpendicular());
+                        CorrectLessEnemies(ref evade_pos, evade_direction);
                         break;
 
                     case 2: //both
-                        if (!CorrectLessEnemies(ref evade_pos, evade_direction.Perpendicular()))
-                            CorrectNearTurret(ref evade_pos, evade_direction.Perpendicular());
+                        if (!CorrectLessEnemies(ref evade_pos, evade_direction))
+                            CorrectNearTurret(ref evade_pos, evade_direction);
                         break;
                 }
             }

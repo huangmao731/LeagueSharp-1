@@ -10,10 +10,10 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace ShineCommon.Maths
+namespace SPrediction
 {
     /// <summary>
-    /// Shine Prediction class
+    /// Spacebar Prediction class
     /// </summary>
     public static class Prediction
     {
@@ -33,14 +33,15 @@ namespace ShineCommon.Maths
 
             if (mainMenu != null)
             {
-                predMenu = new Menu("Shine Prediction", "SHINEPRED");
-                predMenu.AddItem(new MenuItem("SHINEPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
+                predMenu = new Menu("SPrediction", "SPRED");
+                predMenu.AddItem(new MenuItem("PREDICTONLIST", "").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
+                predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 mainMenu.AddSubMenu(predMenu);
             }
 
             blInitialized = true;
         }
-       
+
         /// <summary>
         /// Gets Predicted position
         /// </summary>
@@ -57,7 +58,7 @@ namespace ShineCommon.Maths
             if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
 
-            if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || Utility.IsImmobileTarget(target)) //if target is not moving, easy to hit
+            if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || IsImmobileTarget(target)) //if target is not moving, easy to hit
             {
                 hc = HitChance.Immobile;
                 return target.ServerPosition.To2D() + target.Direction.To2D().Perpendicular() * s.Width / 2;
@@ -68,7 +69,7 @@ namespace ShineCommon.Maths
 
             float targetDistance = rangeCheckFrom.Distance(target.ServerPosition);
             float flyTime = 0f;
-             
+
             if (s.Speed != 0) //skillshot with a missile
             {
                 Vector2 Vt = (path[path.Count - 1] - path[0]).Normalized() * target.MoveSpeed;
@@ -118,8 +119,8 @@ namespace ShineCommon.Maths
         {
             if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
-
-            if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || Utility.IsImmobileTarget(target)) //if target is not moving, easy to hit
+            
+            if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || IsImmobileTarget(target)) //if target is not moving, easy to hit
             {
                 hc = HitChance.Immobile;
                 return target.ServerPosition.To2D();
@@ -156,7 +157,7 @@ namespace ShineCommon.Maths
 
                 float multp = (testPos.Distance(senderPos) / 875.0f);
 
-                var dianaArc = new ShineCommon.Maths.Geometry.Polygon(
+                var dianaArc = new SPrediction.Geometry.Polygon(
                                 ClipperWrapper.DefineArc(senderPos - new Vector2(875 / 2f, 20), testPos, (float)Math.PI * multp, 410, 200 * multp),
                                 ClipperWrapper.DefineArc(senderPos - new Vector2(875 / 2f, 20), testPos, (float)Math.PI * multp, 410, 320 * multp));
 
@@ -190,7 +191,7 @@ namespace ShineCommon.Maths
             if (target.IsDashing())
             {
                 var dashInfo = target.GetDashInfo();
-                
+
                 float dashPassedDistance = (Utils.TickCount - dashInfo.StartTick) / 1000f * dashInfo.Speed;
                 Vector2 currentDashPos = dashInfo.StartPos + (dashInfo.EndPos - dashInfo.StartPos).Normalized() * dashPassedDistance;
 
@@ -240,13 +241,31 @@ namespace ShineCommon.Maths
         /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
         /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
         /// <returns>true if spell has casted</returns>
-        public static bool Cast(this Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
+        public static bool SPredictionCast(this Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
         {
             if (rangeCheckFrom == null)
                 rangeCheckFrom = ObjectManager.Player.ServerPosition;
 
+            if (!s.IsSkillshot)
+                return s.Cast(t) == Spell.CastStates.SuccessfullyCasted;
+
+            #region if common prediction selected
+            if (predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
+            {
+                var pout = s.GetPrediction(t, minHit > 1);
+
+                if (minHit > 1)
+                    if (pout.AoeTargetsHitCount >= minHit)
+                        return s.Cast(pout.CastPosition);
+                    else return false;
+
+                if (pout.Hitchance >= hc)
+                    return s.Cast(pout.CastPosition);
+            }
+            #endregion
+
             if (minHit > 1)
-                return Aoe.Cast(s, t, hc, reactionIgnoreDelay, minHit, rangeCheckFrom, filterHPPercent);
+                return Aoe.SPredictionCast(s, t, hc, reactionIgnoreDelay, minHit, rangeCheckFrom, filterHPPercent);
 
             if (t.HealthPercent > filterHPPercent)
                 return false;
@@ -265,7 +284,7 @@ namespace ShineCommon.Maths
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
                     }
-                    
+
                     if (s.Collision && s.GetCollision(rangeCheckFrom.Value.To2D(), new List<Vector2> { pos }).Exists(q => q.IsEnemy)) //needs update
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
@@ -302,17 +321,21 @@ namespace ShineCommon.Maths
         /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
         /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
         /// <returns>true if spell has casted</returns>
-        public static bool CastArc(this Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
+        public static bool SPredictionCastArc(this Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 1, Vector3? rangeCheckFrom = null, float filterHPPercent = 100)
         {
             if (minHit > 1)
                 throw new NotSupportedException("Arc aoe prediction has not supported yet");
 
+            if (predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
+                throw new NotSupportedException("Arc Prediction not supported in Common prediction");
+
+
             if (t.HealthPercent > filterHPPercent)
                 return false;
-
+            
             if (rangeCheckFrom == null)
                 rangeCheckFrom = ObjectManager.Player.ServerPosition;
-            
+
             if (Monitor.TryEnter(EnemyInfo[t.NetworkId].m_lock))
             {
                 try
@@ -367,7 +390,7 @@ namespace ShineCommon.Maths
             /// <param name="rangeCheckFrom">Position where spell will be casted from</param>
             /// <param name="filterHPPercent">Minimum HP Percent to cast (for target)</param>
             /// <returns>true if spell has casted</returns>
-            public static bool Cast(Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 2, Vector3? rangeCheckFrom = null, float filterHPPercent = 0)
+            public static bool SPredictionCast(Spell s, Obj_AI_Hero t, HitChance hc, int reactionIgnoreDelay = 0, byte minHit = 2, Vector3? rangeCheckFrom = null, float filterHPPercent = 0)
             {
                 if (!blInitialized)
                     throw new Exception("Prediction is not initalized");
@@ -385,14 +408,14 @@ namespace ShineCommon.Maths
                         Vector2 pos = ObjectManager.Player.ServerPosition.To2D();
                         switch (s.Type)
                         {
-                            case SkillshotType.SkillshotLine:   pos = Line.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
+                            case SkillshotType.SkillshotLine: pos = Line.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
                                 break;
                             case SkillshotType.SkillshotCircle: pos = Circle.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
                                 break;
-                            case SkillshotType.SkillshotCone:   pos = Cone.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
+                            case SkillshotType.SkillshotCone: pos = Cone.GetPrediction(t, s, t.GetWaypoints(), avgt, movt, filterHPPercent, minHit, out predictedhc, rangeCheckFrom.Value);
                                 break;
                         }
-                        
+
                         //pos = pos + pos.Perpendicular() * s.Width / 2; //need moar test (for lineaar skillshots)
                         if (s.Collision && s.GetCollision(rangeCheckFrom.Value.To2D(), new List<Vector2> { pos }).Exists(q => q.IsEnemy)) //needs update
                         {
@@ -452,7 +475,7 @@ namespace ShineCommon.Maths
                     vec = new Vector2[] { };
                     return false;
                 }
-                
+
                 public static Vector2 GetPrediction(Obj_AI_Hero t, Spell s, List<Vector2> path, float avgt, float movt, float filterHPPercent, byte minHit, out HitChance hc, Vector3 rangeCheckFrom)
                 {
                     Vector2 castPos = Prediction.GetPrediction(t, s, path, avgt, movt, out hc, rangeCheckFrom);
@@ -734,7 +757,7 @@ namespace ShineCommon.Maths
             {
                 if (predMenu == null)
                     return 0;
-                return predMenu.Item("SHINEPREDREACTIONDELAY").GetValue<Slider>().Value;
+                return predMenu.Item("SPREDREACTIONDELAY").GetValue<Slider>().Value;
             }
         }
 
@@ -783,7 +806,7 @@ namespace ShineCommon.Maths
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int MovImmobileTime(this Obj_AI_Hero t)
         {
-            if(!blInitialized)
+            if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
 
             return EnemyInfo[t.NetworkId].IsStopped ? Environment.TickCount - EnemyInfo[t.NetworkId].StopTick : 0;
@@ -814,6 +837,18 @@ namespace ShineCommon.Maths
                 throw new InvalidOperationException("Prediction is not initalized");
 
             return EnemyInfo[t.NetworkId].AvgTick + IgnoreRectionDelay;
+        }
+        #endregion
+
+        #region util funcs
+        private static bool IsImmobilizeBuff(BuffType type)
+        {
+            return type == BuffType.Snare || type == BuffType.Stun || type == BuffType.Charm || type == BuffType.Knockup || type == BuffType.Suppression;
+        }
+
+        private static bool IsImmobileTarget(Obj_AI_Hero target)
+        {
+            return target.Buffs.Count(p => IsImmobilizeBuff(p.Type)) > 0 || target.IsChannelingImportantSpell();
         }
         #endregion
 

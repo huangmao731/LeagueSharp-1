@@ -32,7 +32,7 @@ namespace MoonDiana
             //
             ult = new Menu("R Settings", "rsettings");
             ult.AddItem(new MenuItem("CUSER", "Use R").SetValue(true));
-            ult.AddItem(new MenuItem("CUSERTOWER", "Dont Use R If Enemy is Under Tower").SetValue(false));
+            ult.AddItem(new MenuItem("CUSERTOWER", "Dont Use R if Enemy is Under Tower").SetValue(false));
             ult.AddItem(new MenuItem("CUSERMETHOD", "R Method").SetValue<StringList>(new StringList(new string[] { "Use Smart R", "Use Only R To Moonlight Debuffed", "Use R Always" }, 0)));
             //
             combo.AddSubMenu(ult);
@@ -41,7 +41,7 @@ namespace MoonDiana
             harass.AddItem(new MenuItem("HUSEQ", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("HUSEW", "Use W").SetValue(true));
             harass.AddItem(new MenuItem("HUSEE", "Use E").SetValue(false));
-            harass.AddItem(new MenuItem("HUSER", "Use R If Moonlight Debuffed").SetValue(true));
+            harass.AddItem(new MenuItem("HUSER", "Use R if Moonlight Debuffed").SetValue(true));
             harass.AddItem(new MenuItem("HMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
             laneclear = new Menu("LaneClear/JungleClear", "LaneClear");
@@ -72,7 +72,7 @@ namespace MoonDiana
                     };
 
             misc.AddItem(new MenuItem("MINTERRUPTE", "Use E For Interrupt").SetValue(true));
-            misc.AddItem(new MenuItem("MINTERRUPTRE", "Use R->E For Interrupt Important Spells").SetValue(true));
+            misc.AddItem(new MenuItem("MINTERRUPTRE", "Use R->E to Interrupt Important Spells").SetValue(true));
             misc.AddItem(new MenuItem("MGAPCLOSEW", "Use W For Gapcloser").SetValue(true));
             misc.AddItem(new MenuItem("MLXORBWALKER", "Use LXOrbwalker").SetValue(false))
                         .ValueChanged += (s, ar) =>
@@ -245,7 +245,7 @@ namespace MoonDiana
                         HitChance hc;
                         Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(m_target, Spells[Q], m_target.GetWaypoints(), m_target.AvgMovChangeTime() + 100, m_target.LastMovChangeTime(), out hc);
                         if (hc >= HitChance.High)
-                            Spells[Q].Cast();
+                            Spells[Q].Cast(pos);
                     }
 
                     if (Spells[R].IsReady() && !m_target.IsDead && HasMoonlight(m_target))
