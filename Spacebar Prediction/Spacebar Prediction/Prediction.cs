@@ -288,6 +288,9 @@ namespace SPrediction
             if (minHit > 1)
                 return Aoe.SPredictionCast(s, t, hc, reactionIgnoreDelay, minHit, rangeCheckFrom, filterHPPercent);
 
+            if (s.Collision && minHit > 1)
+                throw new InvalidOperationException("You can't use collisionable spells with aoe");
+
             if (t.HealthPercent > filterHPPercent)
                 return false;
 
