@@ -84,6 +84,7 @@
     <Compile Include="ClipperWrapper.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="Prediction.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

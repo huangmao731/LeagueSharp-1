@@ -52,7 +52,7 @@ namespace SPrediction
             if (mainMenu != null)
             {
                 predMenu = new Menu("SPrediction", "SPRED");
-                predMenu.AddItem(new MenuItem("PREDICTONLIST", "").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
+                predMenu.AddItem(new MenuItem("PREDICTONLIST", "Prediction Method").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
                 predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 mainMenu.AddSubMenu(predMenu);
             }
