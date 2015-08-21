@@ -133,6 +133,75 @@ namespace SPrediction
             return path[path.Count - 1];
         }
 
+        public static Vector2 GetPredictionMethod2(Obj_AI_Hero target, Spell s, List<Vector2> path, float avgt, float movt, out HitChance hc, Vector3 rangeCheckFrom)
+        {
+            if (!blInitialized)
+                throw new InvalidOperationException("Prediction is not initalized");
+
+            if (target.MovImmobileTime() > 200 || target.AvgMovChangeTime() == 0 || IsImmobileTarget(target)) //if target is not moving, easy to hit
+            {
+                hc = HitChance.Immobile;
+                return target.ServerPosition.To2D() + target.Direction.To2D().Perpendicular() * s.Width / 2;
+            }
+
+            if (target.IsDashing())
+                return GetDashingPrediction(target, s, out hc, rangeCheckFrom);
+
+            float targetDistance = rangeCheckFrom.Distance(target.ServerPosition);
+            float flyTimeMin = 0f;
+            float flyTimeMax = 0f;
+
+            if (s.Speed != 0) //skillshot with a missile
+            {
+                flyTimeMin = targetDistance / s.Speed;
+                flyTimeMax = s.Range / s.Speed;
+            }
+
+            float tMin = flyTimeMin + s.Delay + Game.Ping / 2000f;
+            float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f;
+            float pathTime = 0f;
+            int[] x = new int[] {-1, -1};
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                float t = path[i + 1].Distance(path[i]) / target.MoveSpeed;
+
+                if (pathTime <= tMin && pathTime + t >= tMin)
+                    x[0] = i;
+                if (pathTime <= tMax && pathTime + t >= tMax)
+                    x[1] = i;
+
+                if (x[0] != -1 && x[1] != -1)
+                    break;
+
+                pathTime += t;
+            }
+
+            for (int k = 0; k < 2; k++)
+            {
+                Vector2 direction = (path[x[k] + 1] - path[x[k]]).Normalized();
+                float distance = path[x[k] + 1].Distance(path[x[k]]) / 40;
+                for (int i = 0; i < 40; i++)
+                {
+                    Vector2 center = path[x[k]] + (direction * distance * i) + (direction * distance / 2);
+                    float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(center) / s.Speed : 0f;
+                    float t = flytime + s.Delay;
+                    Vector2 pA = center - direction * s.Width / 2;
+                    Vector2 pB = center + direction * s.Width / 2;
+                    float arriveTimeA = target.ServerPosition.To2D().Distance(pA) / target.MoveSpeed;
+                    float arriveTimeB = target.ServerPosition.To2D().Distance(pB) / target.MoveSpeed;
+
+                    if (Math.Min(arriveTimeA, arriveTimeB) <= t && Math.Max(arriveTimeA, arriveTimeB) >= t)
+                    {
+                        hc = GetHitChance(t, avgt, movt);
+                        return center;
+                    }
+                }
+            }
+
+            hc = HitChance.Impossible;
+            return path[path.Count - 1];
+        }
+
         /// <summary>
         /// Gets Predicted position for arc
         /// </summary>
@@ -308,8 +377,13 @@ namespace SPrediction
                     HitChance predictedhc;
                     float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
                     float movt = t.LastMovChangeTime();
-                    Vector2 pos = GetPrediction(t, s, t.GetWaypoints(), avgt, movt, out predictedhc, rangeCheckFrom.Value);
-
+                    Vector2 pos;
+                    var waypoints = t.GetWaypoints();
+                    if (waypoints.PathLength() / t.MoveSpeed > 1f)
+                        pos = GetPredictionMethod2(t, s, waypoints, avgt, movt, out predictedhc, rangeCheckFrom.Value);
+                    else
+                        pos = GetPrediction(t, s, waypoints, avgt, movt, out predictedhc, rangeCheckFrom.Value);
+                    //Vector2 pos = GetPredictionMethod2(t, s, t.GetWaypoints(), avgt, movt, out predictedhc, rangeCheckFrom.Value);
                     if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + (s.Type == SkillshotType.SkillshotCircle ? s.Width / 2 : 0)) //out of range
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
