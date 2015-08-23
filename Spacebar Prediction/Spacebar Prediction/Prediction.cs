@@ -490,7 +490,7 @@ namespace SPrediction
             if (minHit > 1)
                 throw new NotSupportedException("Arc aoe prediction has not supported yet");
 
-            if (predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
+            if (predMenu != null && predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
                 throw new NotSupportedException("Arc Prediction not supported in Common prediction");
 
 
@@ -535,10 +535,6 @@ namespace SPrediction
 
                     Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                     return false;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
                 }
                 finally
                 {
@@ -966,7 +962,7 @@ namespace SPrediction
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (predMenu.Item("SPREDDRAWINGS").GetValue<bool>())
+            if (predMenu != null && predMenu.Item("SPREDDRAWINGS").GetValue<bool>())
             {
                 foreach (Obj_AI_Hero enemy in HeroManager.Enemies)
                 {

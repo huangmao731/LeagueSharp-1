@@ -276,7 +276,7 @@ namespace MoonDiana
             {
                 var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
                 if (t != null)
-                    Spells[Q].SPredictionCastArc(m_target, HitChance.High);
+                    Spells[Q].SPredictionCastArc(t, HitChance.High);
             }
 
             if (m_target == null)
@@ -358,7 +358,7 @@ namespace MoonDiana
             {
                 var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
                 if (t != null)
-                    Spells[Q].SPredictionCastArc(m_target, HitChance.High, 100);
+                    Spells[Q].SPredictionCastArc(t, HitChance.High, 100);
             }
 
             if (m_target == null)
