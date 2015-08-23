@@ -536,6 +536,10 @@ namespace SPrediction
                     Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                     return false;
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
                 finally
                 {
                     Monitor.Exit(EnemyInfo[t.NetworkId].m_lock);
