@@ -184,16 +184,6 @@ namespace MoonDiana
                         if (!m_target.IsDead && Spells[E].IsInRange(m_target))
                             Spells[E].Cast();
                     }
-                    else
-                    {
-                        if (HasMoonlight(m_target))
-                        {
-                            if (!m_target.IsDead)
-                                Spells[R].CastOnUnit(m_target);
-                            if (!m_target.IsDead && Spells[E].IsInRange(m_target))
-                                Spells[E].Cast();
-                        }
-                    }
                     m_misaya_start_tick = 0;
                 }
             }
