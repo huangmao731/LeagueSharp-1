@@ -210,7 +210,7 @@ namespace MoonDiana
 
             if (m_target != null)
             {
-                var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).OrderBy(r => r.ServerPosition.Distance(Game.CursorPos)).FirstOrDefault();
                 if (minion == null)
                 {
                     minion = MinionManager.GetMinions(Spells[Q].Range - 20, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
