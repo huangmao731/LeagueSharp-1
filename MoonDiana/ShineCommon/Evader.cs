@@ -24,8 +24,8 @@ using System.Text;
 using System.Threading;
 using LeagueSharp;
 using LeagueSharp.Common;
-using ShineCommon.Maths;
-using Geometry = ShineCommon.Maths.Geometry;
+using SPrediction;
+using Geometry = SPrediction.Geometry;
 using SharpDX;
 
 namespace ShineCommon

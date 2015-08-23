@@ -345,34 +345,33 @@ namespace MoonDiana
             bool useFixedDistance = true,
             bool randomizeMinDistance = true)
         {
-            try
+
+            if (target != null && target.IsValidTarget() && CanAttack())
             {
-                if (target.IsValidTarget() && CanAttack())
-                {
-                    DisableNextAttack = false;
-                    FireBeforeAttack(target);
+                DisableNextAttack = false;
+                FireBeforeAttack(target);
 
-                    if (!DisableNextAttack)
+                if (!DisableNextAttack)
+                {
+                    if (!NoCancelChamps.Contains(Player.ChampionName))
                     {
-                        if (!NoCancelChamps.Contains(Player.ChampionName))
-                        {
-                            LastAATick = Utils.GameTimeTickCount + Game.Ping + 100 - (int)(ObjectManager.Player.AttackCastDelay * 1000f);
-                            _missileLaunched = false;
-                        }
-                        Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                        _lastTarget = target;
-                        return;
+                        LastAATick = Utils.GameTimeTickCount + Game.Ping + 100 - (int)(ObjectManager.Player.AttackCastDelay * 1000f);
+                        _missileLaunched = false;
                     }
-                }
+                    
+                    if (!Player.IssueOrder(GameObjectOrder.AttackUnit, target))
+                    {
+                        ResetAutoAttackTimer();
+                    }
 
-                if (CanMove(extraWindup))
-                {
-                    MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
+                    _lastTarget = target;
+                    return;
                 }
             }
-            catch (Exception e)
+
+            if (CanMove(extraWindup))
             {
-                Console.WriteLine(e.ToString());
+                MoveTo(position, holdAreaRadius, false, useFixedDistance, randomizeMinDistance);
             }
         }
 
@@ -666,7 +665,7 @@ namespace MoonDiana
                                     minion.IsValidTarget() && InAutoAttackRange(minion) &&
                                     minion.Health <
                                     2 *
-                                    (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod));
+                                    (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod)).OrderByDescending(minion => minion.MaxHealth);
 
                     foreach (var minion in MinionList)
                     {

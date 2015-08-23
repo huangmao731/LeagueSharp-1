@@ -88,15 +88,16 @@
     <Compile Include="ShineCommon\Activator\Summoner.cs" />
     <Compile Include="ShineCommon\BaseChamp.cs" />
     <Compile Include="ShineCommon\HookManager.cs" />
-    <Compile Include="ShineCommon\Maths\ClipperWrapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShineCommon\Evader.cs" />
-    <Compile Include="ShineCommon\Maths\Geometry.cs" />
-    <Compile Include="ShineCommon\Maths\Prediction.cs" />
     <Compile Include="ShineCommon\Pool\ObjectPool.cs" />
     <Compile Include="ShineCommon\SpellDatabase.cs" />
     <Compile Include="ShineCommon\Utility.cs" />
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\ClipperWrapper.cs" />
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Collision.cs" />
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Geometry.cs" />
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Prediction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

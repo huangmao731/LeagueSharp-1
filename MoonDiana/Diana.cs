@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using ShineCommon;
-using ShineCommon.Maths;
+using SPrediction;
 using SharpDX;
 
 namespace MoonDiana 
@@ -47,6 +47,7 @@ namespace MoonDiana
             laneclear = new Menu("LaneClear/JungleClear", "LaneClear");
             laneclear.AddItem(new MenuItem("LUSEQ", "Use Q").SetValue(true));
             laneclear.AddItem(new MenuItem("LUSEW", "Use W").SetValue(true));
+            laneclear.AddItem(new MenuItem("LMINC", "Min. Minions to use Q & W").SetValue<Slider>(new Slider(3, 1, 6)));
             laneclear.AddItem(new MenuItem("LMANA", "Min. Mana Percent").SetValue(new Slider(50, 100, 0)));
 
             misc = new Menu("Misc", "Misc");
@@ -70,7 +71,7 @@ namespace MoonDiana
                             m_moon_r_casted = false;
                         }
                     };
-
+            misc.AddItem(new MenuItem("MFLEE", "Flee Key").SetValue<KeyBind>(new KeyBind('A', KeyBindType.Press)));
             misc.AddItem(new MenuItem("MINTERRUPTE", "Use E For Interrupt").SetValue(true));
             misc.AddItem(new MenuItem("MINTERRUPTRE", "Use R->E to Interrupt Important Spells").SetValue(true));
             misc.AddItem(new MenuItem("MGAPCLOSEW", "Use W For Gapcloser").SetValue(true));
@@ -145,6 +146,8 @@ namespace MoonDiana
                 Misaya();
             else if (Config.Item("MMOON").GetValue<KeyBind>().Active)
                 Moon();
+            else if (Config.Item("MFLEE").GetValue<KeyBind>().Active)
+                Flee();
         }
 
         //r q w r e
@@ -153,12 +156,13 @@ namespace MoonDiana
             if (m_target == null && ComboReady())
                 m_target = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Magical);
 
+            if (!LXOrbwalkerEnabled)
+                Orbwalking.Orbwalk(m_target, Game.CursorPos);
+            else
+                LXOrbwalker.Orbwalk(Game.CursorPos, m_target);
+
             if (m_target != null)
             {
-                if (!LXOrbwalkerEnabled)
-                    Orbwalking.Orbwalk(m_target, Game.CursorPos);
-                else
-                    LXOrbwalker.Orbwalk(Game.CursorPos, m_target);
                 if (m_target.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <= 810f)
                 {
                     if (m_misaya_start_tick == 0) //begin combo
@@ -171,13 +175,13 @@ namespace MoonDiana
                 if (m_misaya_start_tick != 0)
                 {
                     Spells[Q].Cast(m_target.ServerPosition);
-                    if (!m_target.IsDead)
+                    if (!m_target.IsDead && Spells[W].IsInRange(m_target))
                         Spells[W].Cast();
                     if (!Config.Item("MMISAYADR").GetValue<bool>())
                     {
                         if (!m_target.IsDead)
                             Spells[R].CastOnUnit(m_target);
-                        if (!m_target.IsDead)
+                        if (!m_target.IsDead && Spells[E].IsInRange(m_target))
                             Spells[E].Cast();
                     }
                     else
@@ -186,15 +190,13 @@ namespace MoonDiana
                         {
                             if (!m_target.IsDead)
                                 Spells[R].CastOnUnit(m_target);
-                            if (!m_target.IsDead)
+                            if (!m_target.IsDead && Spells[E].IsInRange(m_target))
                                 Spells[E].Cast();
                         }
                     }
                     m_misaya_start_tick = 0;
                 }
             }
-            else
-                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
         }
 
         public void Moon()
@@ -202,13 +204,14 @@ namespace MoonDiana
             if (m_target == null && ComboReady())
                 m_target = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
 
+            if (!LXOrbwalkerEnabled)
+                Orbwalking.Orbwalk(m_target, Game.CursorPos);
+            else
+                LXOrbwalker.Orbwalk(Game.CursorPos, m_target);
+
             if (m_target != null)
             {
-                if (!LXOrbwalkerEnabled)
-                    Orbwalking.Orbwalk(m_target, Game.CursorPos);
-                else
-                    LXOrbwalker.Orbwalk(Game.CursorPos, m_target);
-                var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health < Spells[Q].GetDamage(p) && p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
                 if (minion == null)
                 {
                     minion = MinionManager.GetMinions(Spells[Q].Range - 20, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
@@ -241,21 +244,27 @@ namespace MoonDiana
                         Spells[W].Cast();
 
                     if (Spells[Q].IsReady() && !m_target.IsDead)
-                    {
-                        HitChance hc;
-                        Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(m_target, Spells[Q], m_target.GetWaypoints(), m_target.AvgMovChangeTime() + 100, m_target.LastMovChangeTime(), out hc, ObjectManager.Player.ServerPosition);
-                        if (hc >= HitChance.High)
-                            Spells[Q].Cast(pos);
-                    }
+                        Spells[Q].SPredictionCastArc(m_target, HitChance.High, 100);
 
                     if (Spells[R].IsReady() && !m_target.IsDead && HasMoonlight(m_target))
                         Spells[R].Cast();
                     m_moon_start_tick = 0;
                 }
             }
-            else
-                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+        }
 
+        public void Flee()
+        {
+            var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+            if (minion == null)
+            {
+                minion = MinionManager.GetMinions(Spells[Q].Range - 20, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                if (minion != null)
+                    Spells[Q].Cast(minion.ServerPosition);
+            }
+
+            if (minion != null)
+                Spells[R].CastOnUnit(minion);
         }
 
         public void Combo()
@@ -267,12 +276,7 @@ namespace MoonDiana
             {
                 var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
                 if (t != null)
-                {
-                    HitChance hc;
-                    Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(t, Spells[Q], t.GetWaypoints(), t.AvgMovChangeTime(), t.LastMovChangeTime(), out hc, ObjectManager.Player.ServerPosition);
-                    if (hc >= HitChance.VeryHigh)
-                        Spells[Q].Cast(pos);
-                }
+                    Spells[Q].SPredictionCastArc(m_target, HitChance.High);
             }
 
             if (m_target == null)
@@ -354,12 +358,7 @@ namespace MoonDiana
             {
                 var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
                 if (t != null)
-                {
-                    HitChance hc;
-                    Vector2 pos = ShineCommon.Maths.Prediction.GetArcPrediction(t, Spells[Q], t.GetWaypoints(), t.AvgMovChangeTime() + 100, t.LastMovChangeTime(), out hc, ObjectManager.Player.ServerPosition);
-                    if (hc >= HitChance.VeryHigh)
-                        Spells[Q].Cast(pos);
-                }
+                    Spells[Q].SPredictionCastArc(m_target, HitChance.High, 100);
             }
 
             if (m_target == null)
@@ -413,7 +412,7 @@ namespace MoonDiana
             if (Spells[Q].IsReady() && Config.Item("LUSEQ").GetValue<bool>())
             {
                 var farm = MinionManager.GetBestCircularFarmLocation(MinionManager.GetMinions(Spells[Q].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Select(p => p.ServerPosition.To2D()).ToList(), Spells[Q].Width, Spells[Q].Range);
-                if (farm.MinionsHit > 0)
+                if (farm.MinionsHit >= Config.Item("LMINC").GetValue<Slider>().Value)
                     Spells[Q].Cast(farm.Position);
 
                 var jungle_minion = MinionManager.GetMinions(Spells[Q].Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
@@ -423,7 +422,7 @@ namespace MoonDiana
 
             if (Spells[W].IsReady() && Config.Item("LUSEW").GetValue<bool>())
             {
-                if (MinionManager.GetMinions(Spells[W].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Count >= 3)
+                if (MinionManager.GetMinions(Spells[W].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Count >= Config.Item("LMINC").GetValue<Slider>().Value)
                     Spells[W].Cast();
 
                 var jungle_minion = MinionManager.GetMinions(Spells[W].Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();

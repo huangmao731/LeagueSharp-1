@@ -25,13 +25,13 @@ using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 using ShineCommon;
-using ShineCommon.Maths;
+using SPrediction;
 using ShineCommon.Activator;
 using SharpDX;
 using SharpDX.Direct3D9;
 //typedefs
-using Prediction = ShineCommon.Maths.Prediction;
-using Geometry = ShineCommon.Maths.Geometry;
+using Prediction = SPrediction.Prediction;
+using Geometry = SPrediction.Geometry;
 
 namespace ShineCommon
 {
@@ -61,21 +61,17 @@ namespace ShineCommon
                     Quality = FontQuality.ClearTypeNatural
                 });
 
-            Config = new Menu(String.Format("Shine# {0} !", szChampName), szChampName, true);
+            Config = new Menu("Moon Diana", "moondiana", true);
             
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
             Orbwalker = new MoonDiana.Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             
-            pred = new Menu("Prediction Settings", "predset");
-            pred.AddItem(new MenuItem("BPREDLIST", "").SetValue(new StringList(new[] { "Shine# Prediction (recommend)", "Common Predicion" }, 0)));
-
             activator = new Menu("Activator", "activator");
             new Smite(TargetSelector.DamageType.Magical, activator);
             new Ignite(TargetSelector.DamageType.Magical, activator);
 
             drawing = new Menu("Drawings", "drawings");
 
-            Config.AddSubMenu(pred);
             Config.AddSubMenu(activator);
             Config.AddSubMenu(drawing);
             SpellDatabase.InitalizeSpellDatabase();
@@ -169,7 +165,7 @@ namespace ShineCommon
                     if (s.IsReady())
                     {
                         if (pred.Item("BPREDLIST").GetValue<StringList>().SelectedIndex == 0)
-                            s.Cast(t, hc);
+                            s.SPredictionCast(t, hc);
                         else
                             s.Cast(p.CastPosition);
                     }

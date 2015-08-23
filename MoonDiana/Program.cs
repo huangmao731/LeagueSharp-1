@@ -57,9 +57,9 @@ namespace MoonDiana
             Obj_AI_Base.OnProcessSpellCast += Champion.Obj_AI_Base_OnProcessSpellCast;
             #endregion
 
-            ShineCommon.Maths.Prediction.Initialize();
+            SPrediction.Prediction.Initialize(Champion.Config);
             
-            Notifications.AddNotification(String.Format("Shine# - {0} Loaded !", ObjectManager.Player.ChampionName), 3000);
+            Notifications.AddNotification(String.Format("Moon Diana Loaded !"), 3000);
         }
     }
 }
