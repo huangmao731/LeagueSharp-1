@@ -454,6 +454,9 @@ namespace MoonDiana
 
         public void BeforeDraw()
         {
+            if (ComboReady())
+                Text.DrawText(null, "Misaya & Moon Combo Is Ready", (int)(ObjectManager.Player.HPBarPosition.X + ObjectManager.Player.BoundingRadius / 2 - 10), (int)(ObjectManager.Player.HPBarPosition.Y - 20), SharpDX.Color.Red);
+
             if (m_target != null)
             {
                 if (Config.Item("MMISAYA").GetValue<KeyBind>().Active)
