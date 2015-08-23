@@ -94,10 +94,18 @@
     <Compile Include="ShineCommon\Pool\ObjectPool.cs" />
     <Compile Include="ShineCommon\SpellDatabase.cs" />
     <Compile Include="ShineCommon\Utility.cs" />
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\ClipperWrapper.cs" />
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Collision.cs" />
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Geometry.cs" />
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Prediction.cs" />
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\ClipperWrapper.cs">
+      <Link>SPrediction\ClipperWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Collision.cs">
+      <Link>SPrediction\Collision.cs</Link>
+    </Compile>
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Geometry.cs">
+      <Link>SPrediction\Geometry.cs</Link>
+    </Compile>
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Prediction.cs">
+      <Link>SPrediction\Prediction.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
