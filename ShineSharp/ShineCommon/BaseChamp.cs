@@ -7,13 +7,13 @@ using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 using ShineCommon;
-using ShineCommon.Maths;
+using SPrediction;
 using ShineCommon.Activator;
 using SharpDX;
 using SharpDX.Direct3D9;
 //typedefs
-using Prediction = ShineCommon.Maths.Prediction;
-using Geometry = ShineCommon.Maths.Geometry;
+using Prediction = SPrediction.Prediction;
+using Geometry = SPrediction.Geometry;
 
 namespace ShineCommon
 {
@@ -150,7 +150,7 @@ namespace ShineCommon
                     if (s.IsReady())
                     {
                         if (pred.Item("BPREDLIST").GetValue<StringList>().SelectedIndex == 0)
-                            s.Cast(t, hc);
+                            s.SPredictionCast(t, hc);
                         else
                             s.Cast(p.CastPosition);
                     }

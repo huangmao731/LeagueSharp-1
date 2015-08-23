@@ -83,7 +83,6 @@
   <ItemGroup>
     <Compile Include="Champions\Amumu.cs" />
     <Compile Include="Champions\Blitzcrank.cs" />
-    <Compile Include="Champions\Diana.cs" />
     <Compile Include="Champions\Morgana.cs" />
     <Compile Include="Champions\Sivir.cs" />
     <Compile Include="ShineCommon\Activator\Ignite.cs" />
@@ -92,15 +91,24 @@
     <Compile Include="ShineCommon\BaseChamp.cs" />
     <Compile Include="Champions\Ezreal.cs" />
     <Compile Include="ShineCommon\HookManager.cs" />
-    <Compile Include="ShineCommon\Maths\ClipperWrapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShineCommon\Evader.cs" />
-    <Compile Include="ShineCommon\Maths\Geometry.cs" />
-    <Compile Include="ShineCommon\Maths\Prediction.cs" />
     <Compile Include="ShineCommon\Pool\ObjectPool.cs" />
     <Compile Include="ShineCommon\SpellDatabase.cs" />
     <Compile Include="ShineCommon\Utility.cs" />
+	<Compile Include="..\Spacebar Prediction\Spacebar Prediction\ClipperWrapper.cs">
+      <Link>SPrediction\ClipperWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Collision.cs">
+      <Link>SPrediction\Collision.cs</Link>
+    </Compile>
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Geometry.cs">
+      <Link>SPrediction\Geometry.cs</Link>
+    </Compile>
+    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Prediction.cs">
+      <Link>SPrediction\Prediction.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

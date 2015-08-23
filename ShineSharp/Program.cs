@@ -44,9 +44,6 @@ namespace ShineSharp
                 case "amumu":
                     Champion = new Amumu();
                     break;
-                case "diana":
-                    Champion = new Diana();
-                    break;
             }
 
             Champion.CreateConfigMenu();
@@ -75,7 +72,7 @@ namespace ShineSharp
             Obj_AI_Base.OnProcessSpellCast += Champion.Obj_AI_Base_OnProcessSpellCast;
             #endregion
 
-            ShineCommon.Maths.Prediction.Initialize();
+            SPrediction.Prediction.Initialize();
             
             Notifications.AddNotification(String.Format("Shine# - {0} Loaded !", ObjectManager.Player.ChampionName), 3000);
         }

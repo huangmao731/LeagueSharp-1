@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using LeagueSharp;
 using LeagueSharp.Common;
 using ShineCommon;
-using ShineCommon.Maths;
+using SPrediction;
 using SharpDX;
 
 namespace ShineSharp.Champions
@@ -148,15 +148,15 @@ namespace ShineSharp.Champions
                     HitChance ulthc = ShineCommon.Utility.HitchanceArray[Config.Item("CRHITCHANCE").GetValue<StringList>().SelectedIndex];
                     if (Config.Item("CUSEHPHIT").GetValue<bool>())
                     {
-                        if (Spells[R].Cast(t, ulthc, 0, (byte)Config.Item("CUSERHIT").GetValue<Slider>().Value, null, Config.Item("CUSERHP").GetValue<Slider>().Value))
+                        if (Spells[R].SPredictionCast(t, ulthc, 0, (byte)Config.Item("CUSERHIT").GetValue<Slider>().Value, null, Config.Item("CUSERHP").GetValue<Slider>().Value))
                             return;
                     }
 
                     if (t.Health / t.MaxHealth * 100 <= Config.Item("CUSERHP").GetValue<Slider>().Value)
-                        if (Spells[R].Cast(t, ulthc))
+                        if (Spells[R].SPredictionCast(t, ulthc))
                             return;
 
-                    Spells[R].Cast(t, ulthc, 0, (byte)Config.Item("CUSERHIT").GetValue<Slider>().Value, null, 100);
+                    Spells[R].SPredictionCast(t, ulthc, 0, (byte)Config.Item("CUSERHIT").GetValue<Slider>().Value, null, 100);
                 }
             }
         }
