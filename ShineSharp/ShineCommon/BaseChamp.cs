@@ -21,7 +21,7 @@ namespace ShineCommon
     {
         public const int Q = 0, W = 1, E = 2, R = 3;
 
-        public Menu Config, combo, ult, harass, laneclear, misc, drawing, evade, pred, activator;
+        public Menu Config, combo, ult, harass, laneclear, misc, drawing, evade, activator;
         public Orbwalking.Orbwalker Orbwalker;
         public Spell[] Spells = new Spell[4];
         public Evader m_evader;
@@ -47,16 +47,12 @@ namespace ShineCommon
             TargetSelector.AddToMenu(Config.SubMenu("Target Selector"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             
-            pred = new Menu("Prediction Settings", "predset");
-            pred.AddItem(new MenuItem("BPREDLIST", "").SetValue(new StringList(new[] { "Shine# Prediction (recommend)", "Common Predicion" }, 0)));
-
             activator = new Menu("Activator", "activator");
             new Smite(TargetSelector.DamageType.Magical, activator);
             new Ignite(TargetSelector.DamageType.Magical, activator);
 
             drawing = new Menu("Drawings", "drawings");
 
-            Config.AddSubMenu(pred);
             Config.AddSubMenu(activator);
             Config.AddSubMenu(drawing);
             SpellDatabase.InitalizeSpellDatabase();
@@ -148,12 +144,7 @@ namespace ShineCommon
                 if (s.Type != SkillshotType.SkillshotCone)
                 {
                     if (s.IsReady())
-                    {
-                        if (pred.Item("BPREDLIST").GetValue<StringList>().SelectedIndex == 0)
-                            s.SPredictionCast(t, hc);
-                        else
-                            s.Cast(p.CastPosition);
-                    }
+                        s.SPredictionCast(t, hc);
                 }
                 else
                     s.Cast(p.CastPosition);
