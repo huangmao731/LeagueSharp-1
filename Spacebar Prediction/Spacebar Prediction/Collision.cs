@@ -55,7 +55,7 @@ namespace SPrediction
         {
             Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
             HitChance hc;
-            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetPrediction(p, s, p.GetWaypoints(), 0, 0, 0, out hc, p.ServerPosition), p.BoundingRadius))) && hc >= HitChance.High);
+            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, Prediction.GetPrediction(p, s, p.GetWaypoints(), 0, 0, 0, out hc, p.ServerPosition)));
         }
 
         /// <summary>

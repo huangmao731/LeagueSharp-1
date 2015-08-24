@@ -94,9 +94,9 @@ namespace SPrediction
             lock (LastSpells)
             {
                 LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
-                if (sender.IsMe && !args.SData.IsAutoAttack() && args.SData.Name == "EzrealMysticShot" && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
+                if (sender.IsMe && !args.SData.IsAutoAttack()  && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
                 {
-                    if (!LastSpells.Exists(p => p.name == args.SData.Name))
+                    if (sender.Spellbook.Spells.Find(p => p.Name == args.SData.Name).Slot == SpellSlot.Q && !LastSpells.Exists(p => p.name == args.SData.Name))
                     {
                         LastSpells.Add(new _lastSpells(args.SData.Name, Environment.TickCount));
                         castCount++;
@@ -221,10 +221,19 @@ namespace SPrediction
                 return target.ServerPosition.To2D();
             }
 
-            if (target is Obj_AI_Hero && ((Obj_AI_Hero)target).IsChannelingImportantSpell())
+            if (target is Obj_AI_Hero)
             {
-                hc = HitChance.VeryHigh;
-                return target.ServerPosition.To2D();
+                if (((Obj_AI_Hero)target).IsChannelingImportantSpell())
+                {
+                    hc = HitChance.VeryHigh;
+                    return target.ServerPosition.To2D();
+                }
+
+                if (avgp < 400 && movt < 100)
+                {
+                    hc = HitChance.High;
+                    return target.ServerPosition.To2D();
+                }
             }
 
             if (IsImmobileTarget(target))
@@ -533,7 +542,7 @@ namespace SPrediction
 
                     if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s, true, false, true))
                     {
-                        lastDrawHitchance = 0;
+                        lastDrawHitchance = (int)HitChance.Collision;
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
                     }
@@ -1085,7 +1094,7 @@ namespace SPrediction
                     Vector2 startPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * lastDrawWidth).To3D());
                     Vector2 endPos = Drawing.WorldToScreen((lastDrawPos + lastDrawDirection * lastDrawWidth).To3D());
                     Drawing.DrawLine(startPos, endPos, 3, System.Drawing.Color.Gold);
-                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, "%" + lastDrawHitchance.ToString());
+                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, lastDrawHitchance == (int)HitChance.Collision ? "Collision" : "%" + lastDrawHitchance.ToString());
                 }
 
                 Drawing.DrawText(Drawing.Width - 200, 0, System.Drawing.Color.Red, String.Format("Casted Spell Count: {0}", castCount));
