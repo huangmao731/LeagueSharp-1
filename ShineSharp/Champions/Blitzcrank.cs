@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SPrediction;
 using ShineCommon;
 
 namespace ShineSharp.Champions
@@ -99,11 +100,11 @@ namespace ShineSharp.Champions
         {
             #region Auto Harass
 
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value <= (ObjectManager.Player.Health / ObjectManager.Player.MaxHealth) * 100 && !ObjectManager.Player.UnderTurret())
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && Config.Item("MAUTOQHP").GetValue<Slider>().Value <= ObjectManager.Player.HealthPercent && !ObjectManager.Player.UnderTurret())
             {
-                var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Config.Item("MAUTOQRANGE").GetValue<Slider>().Value) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
+                var t = TargetSelector.GetTarget(Config.Item("MAUTOQRANGE").GetValue<Slider>().Value, TargetSelector.DamageType.Magical);
                 if (t != null && !Config.Item("noautograb" + t.ChampionName).GetValue<bool>())
-                    CastSkillshot(t, Spells[Q], ShineCommon.Utility.HitchanceArray[Config.Item("MAUTOQHITCHANCE").GetValue<StringList>().SelectedIndex]);
+                    Spells[Q].SPredictionCast(t, ShineCommon.Utility.HitchanceArray[Config.Item("MAUTOQHITCHANCE").GetValue<StringList>().SelectedIndex]);
             }
 
             #endregion
@@ -122,7 +123,7 @@ namespace ShineSharp.Champions
                     chase = true;
                     if(Spells[W].IsReady())
                         Spells[W].Cast();
-                    if(ObjectManager.Player.ServerPosition.Distance(t.ServerPosition) <= Spells[R].Range - 10)
+                    if(t.IsValidTarget(Spells[R].Range - 10))
                         Spells[R].Cast();
                 }
             }

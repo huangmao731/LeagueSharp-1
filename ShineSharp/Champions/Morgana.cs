@@ -67,9 +67,9 @@ namespace ShineSharp.Champions
         public void BeforeOrbwalk()
         {
             #region Auto Harass
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret() && ObjectManager.Player.CountEnemiesInRange(Spells[Q].Range) > 2)
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
             {
-                var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Spells[Q].Range) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
+                var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
                 if (t != null)
                     CastSkillshot(t, Spells[Q], HitChance.VeryHigh);
             }
