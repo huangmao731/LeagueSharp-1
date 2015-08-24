@@ -193,7 +193,7 @@ namespace ShineCommon
                         if (sender_pos.Distance(end_pos) > dcspell.Spell.Range)
                             end_pos = sender_pos + direction * dcspell.Spell.Range;
 
-                        Geometry.Polygon my_hitbox = ClipperWrapper.DefineRectangle(my_pos - 60, my_pos + 60, 60);
+                        Geometry.Polygon my_hitbox = ClipperWrapper.DefineCircle(my_pos, ObjectManager.Player.BoundingRadius);
                         Geometry.Polygon spell_hitbox = null;
 
                         if (dcspell.Spell.IsSkillshot)
@@ -232,7 +232,7 @@ namespace ShineCommon
                                         foreach (Obj_AI_Base ally in allies)
                                         {
                                             Vector2 ally_pos = ally.ServerPosition.To2D();
-                                            Geometry.Polygon ally_hitbox = ClipperWrapper.DefineRectangle(ally_pos, ally_pos + 60, 60);
+                                            Geometry.Polygon ally_hitbox = ClipperWrapper.DefineCircle(ally_pos, ally.BoundingRadius);
                                             if (ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ally_hitbox), ClipperWrapper.MakePaths(spell_hitbox)))
                                             {
                                                 OnSpellHitDetected(direction, ally);

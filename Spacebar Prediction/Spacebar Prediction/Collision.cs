@@ -54,7 +54,7 @@ namespace SPrediction
         public bool CheckMinionCollision(Vector2 from, Vector2 to, float width = 1f)
         {
             Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, width);
-            return MinionManager.GetMinions(from.Distance(to), MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, p.ServerPosition.To2D()));
+            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(p.ServerPosition.To2D(), p.BoundingRadius))));
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace SPrediction
         {
             Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, width);
             List<Obj_AI_Hero> listToCheck =  checkAlly ? HeroManager.AllHeroes : HeroManager.Enemies;
-            return listToCheck.AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, p.ServerPosition.To2D()));
+            return listToCheck.AsParallel().Any(p => !ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(p.ServerPosition.To2D(), p.BoundingRadius))));
         }
 
         /// <summary>
