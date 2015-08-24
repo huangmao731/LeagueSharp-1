@@ -94,24 +94,16 @@
     <Compile Include="ShineCommon\Pool\ObjectPool.cs" />
     <Compile Include="ShineCommon\SpellDatabase.cs" />
     <Compile Include="ShineCommon\Utility.cs" />
-    <Compile Include="SPrediction\ClipperWrapper.cs" />
-    <Compile Include="SPrediction\Collision.cs" />
-    <Compile Include="SPrediction\Geometry.cs" />
-    <Compile Include="SPrediction\Prediction.cs" />
-    <Compile Include="SPrediction\Properties\AssemblyInfo.cs" />
+    <Compile Include="ShineCommon\SPrediction\ClipperWrapper.cs" />
+    <Compile Include="ShineCommon\SPrediction\Collision.cs" />
+    <Compile Include="ShineCommon\SPrediction\Geometry.cs" />
+    <Compile Include="ShineCommon\SPrediction\Prediction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <Compile Include="LXOrbwalker.cs" />
-    <None Include="SPrediction\App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="SPrediction\Spacebar Prediction.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SPrediction\bin\" />
-    <Folder Include="SPrediction\obj\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

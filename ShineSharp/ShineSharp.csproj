@@ -97,21 +97,16 @@
     <Compile Include="ShineCommon\Pool\ObjectPool.cs" />
     <Compile Include="ShineCommon\SpellDatabase.cs" />
     <Compile Include="ShineCommon\Utility.cs" />
-	<Compile Include="..\Spacebar Prediction\Spacebar Prediction\ClipperWrapper.cs">
-      <Link>SPrediction\ClipperWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Collision.cs">
-      <Link>SPrediction\Collision.cs</Link>
-    </Compile>
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Geometry.cs">
-      <Link>SPrediction\Geometry.cs</Link>
-    </Compile>
-    <Compile Include="..\Spacebar Prediction\Spacebar Prediction\Prediction.cs">
-      <Link>SPrediction\Prediction.cs</Link>
-    </Compile>
+    <Compile Include="ShineCommon\SPrediction\ClipperWrapper.cs" />
+    <Compile Include="ShineCommon\SPrediction\Collision.cs" />
+    <Compile Include="ShineCommon\SPrediction\Geometry.cs" />
+    <Compile Include="ShineCommon\SPrediction\Prediction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ShineCommon\SPrediction\Spacebar Prediction.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
