@@ -247,6 +247,7 @@ namespace SPrediction
             float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f;
             float pathTime = 0f;
             int[] x = new int[] {-1, -1};
+
             for (int i = 0; i < path.Count - 1; i++)
             {
                 float t = path[i + 1].Distance(path[i]) / target.MoveSpeed;
@@ -264,23 +265,26 @@ namespace SPrediction
 
             for (int k = 0; k < 2; k++)
             {
-                Vector2 direction = (path[x[k] + 1] - path[x[k]]).Normalized();
-                float distance = path[x[k] + 1].Distance(path[x[k]]) / 40;
-                for (int i = 0; i < 40; i++)
+                if (x[k] != -1)
                 {
-                    Vector2 center = path[x[k]] + (direction * distance * i) + (direction * distance / 2);
-                    float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(center) / s.Speed : 0f;
-                    float t = flytime + s.Delay;
-
-                    Vector2 pA = center - direction * s.Width / 2;
-                    Vector2 pB = center + direction * s.Width / 2;
-                    float arriveTimeA = target.ServerPosition.To2D().Distance(pA) / target.MoveSpeed;
-                    float arriveTimeB = target.ServerPosition.To2D().Distance(pB) / target.MoveSpeed;
-
-                    if (Math.Min(arriveTimeA, arriveTimeB) <= t && Math.Max(arriveTimeA, arriveTimeB) >= t)
+                    Vector2 direction = (path[x[k] + 1] - path[x[k]]).Normalized();
+                    float distance = path[x[k] + 1].Distance(path[x[k]]) / 40;
+                    for (int i = 0; i < 40; i++)
                     {
-                        hc = GetHitChance(t, avgt, movt, avgp);
-                        return center;
+                        Vector2 center = path[x[k]] + (direction * distance * i) + (direction * distance / 2);
+                        float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(center) / s.Speed : 0f;
+                        float t = flytime + s.Delay;
+
+                        Vector2 pA = center - direction * s.Width / 2;
+                        Vector2 pB = center + direction * s.Width / 2;
+                        float arriveTimeA = target.ServerPosition.To2D().Distance(pA) / target.MoveSpeed;
+                        float arriveTimeB = target.ServerPosition.To2D().Distance(pB) / target.MoveSpeed;
+
+                        if (Math.Min(arriveTimeA, arriveTimeB) <= t && Math.Max(arriveTimeA, arriveTimeB) >= t)
+                        {
+                            hc = GetHitChance(t, avgt, movt, avgp);
+                            return center;
+                        }
                     }
                 }
             }
@@ -288,7 +292,7 @@ namespace SPrediction
 
             hc = HitChance.Impossible;
 
-            if (s.Type == SkillshotType.SkillshotCircle)
+            if (s.Type == SkillshotType.SkillshotCircle && (x[0] != -1 || x[1] != -1))
                 hc = HitChance.High;
 
             return path[path.Count - 1];
@@ -527,7 +531,7 @@ namespace SPrediction
                     lastDrawDirection = (pos - rangeCheckFrom.Value.To2D()).Normalized().Perpendicular();
                     lastDrawWidth = (int)s.Width;
 
-                    if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s.Width, true, false, true))
+                    if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s, true, false, true))
                     {
                         lastDrawHitchance = 0;
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
@@ -1087,8 +1091,6 @@ namespace SPrediction
                 Drawing.DrawText(Drawing.Width - 200, 0, System.Drawing.Color.Red, String.Format("Casted Spell Count: {0}", castCount));
                 Drawing.DrawText(Drawing.Width - 200, 20, System.Drawing.Color.Red, String.Format("Hit Spell Count: {0}", hitCount));
                 Drawing.DrawText(Drawing.Width - 200, 40, System.Drawing.Color.Red, String.Format("Hitchance (%): {0}%", (((float)hitCount / (castCount + 1)) * 100).ToString("00.00")));
-
-                MinionManager.GetMinions(2000, MinionTypes.All, MinionTeam.All, MinionOrderTypes.None).ForEach(p => Drawing.DrawCircle(p.Position, p.BoundingRadius, System.Drawing.Color.Red));
             }
         }
 
