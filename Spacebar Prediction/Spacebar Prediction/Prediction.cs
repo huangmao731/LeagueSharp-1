@@ -1002,7 +1002,7 @@ namespace SPrediction
             {
                 if (movt > 100)
                 {
-                    if (avgt - movt >= t * 1.5f)
+                    if (avgt - movt >= t * 1.25f)
                         return HitChance.High;
                     else if (avgt - movt >= t * 0.5f)
                         return HitChance.Medium;
