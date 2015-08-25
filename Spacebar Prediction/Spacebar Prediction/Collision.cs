@@ -15,6 +15,8 @@ namespace SPrediction
         private static int yasuoWallCastedTick;
         private static int yasuoWallLevel;
         private static Vector2 yasuoWallCastedPos;
+        private static List<Tuple<int, Geometry.Polygon>> collisionDrawings = new List<Tuple<int, Geometry.Polygon>>();
+        
 
         /// <summary>
         /// Constructor
@@ -22,6 +24,19 @@ namespace SPrediction
         public Collision()
         {
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        void Drawing_OnDraw(EventArgs args)
+        {
+            lock (collisionDrawings)
+            {
+                collisionDrawings.RemoveAll(p => Environment.TickCount - p.Item1 > 4000);
+                for (int i = 0; i < collisionDrawings.Count; i++)
+                {
+                    collisionDrawings[i].Item2.Draw();
+                }
+            }
         }
 
         /// <summary>
@@ -53,9 +68,9 @@ namespace SPrediction
         /// <returns>true if collision found</returns>
         public bool CheckMinionCollision(Vector2 from, Vector2 to, Spell s)
         {
-            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
+            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);           
             HitChance hc;
-            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, Prediction.GetPrediction(p, s, p.GetWaypoints(), 0, 0, 0, out hc, p.ServerPosition)));
+            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(Prediction.GetPrediction(p, s, p.GetWaypoints(), 0, 0, 0, out hc, p.ServerPosition), p.BoundingRadius)), ClipperWrapper.MakePaths(poly)));
         }
 
         /// <summary>
@@ -70,7 +85,7 @@ namespace SPrediction
         {
             Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
             List<Obj_AI_Hero> listToCheck =  checkAlly ? HeroManager.AllHeroes : HeroManager.Enemies;
-            return listToCheck.AsParallel().Any(p => !ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(p.ServerPosition.To2D(), p.BoundingRadius))));
+            return listToCheck.AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(p.ServerPosition.To2D(), p.BoundingRadius))));
         }
 
         /// <summary>
