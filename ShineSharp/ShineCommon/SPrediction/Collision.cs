@@ -36,12 +36,12 @@ namespace SPrediction
         /// <param name="checkHeroAlly">Check Ally collisions</param>
         /// <param name="checkWall">Check wall collisions</param>
         /// <returns>true if collision found</returns>
-        public bool CheckCollision(Vector2 from, Vector2 to, float width = 1f, bool checkMinion = true, bool checkHero = false, bool checkYasuoWall = true, bool checkHeroAlly = false, bool checkWall = false)
+        public bool CheckCollision(Vector2 from, Vector2 to, Spell s, bool checkMinion = true, bool checkHero = false, bool checkYasuoWall = true, bool checkHeroAlly = false, bool checkWall = false)
         {
-            return  (checkMinion && CheckMinionCollision(from, to, width)) ||
-                    (checkHero && CheckHeroCollision(from, to, width, checkHeroAlly)) ||
-                    (checkYasuoWall && CheckYasuoWallCollision(from, to, width)) ||
-                    (checkWall && CheckWallCollision(from, to, width));
+            return (checkMinion && CheckMinionCollision(from, to, s)) ||
+                    (checkHero && CheckHeroCollision(from, to, s, checkHeroAlly)) ||
+                    (checkYasuoWall && CheckYasuoWallCollision(from, to, s)) ||
+                    (checkWall && CheckWallCollision(from, to, s));
         }
 
         /// <summary>
@@ -51,10 +51,11 @@ namespace SPrediction
         /// <param name="to">End position</param>
         /// <param name="width">Width</param>
         /// <returns>true if collision found</returns>
-        public bool CheckMinionCollision(Vector2 from, Vector2 to, float width = 1f)
+        public bool CheckMinionCollision(Vector2 from, Vector2 to, Spell s)
         {
-            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, width);
-            return MinionManager.GetMinions(from.Distance(to), MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, p.ServerPosition.To2D()));
+            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
+            HitChance hc;
+            return MinionManager.GetMinions(from.Distance(to) + 100, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, Prediction.GetPrediction(p, s, p.GetWaypoints(), 0, 0, 0, out hc, p.ServerPosition)));
         }
 
         /// <summary>
@@ -65,11 +66,11 @@ namespace SPrediction
         /// <param name="width">Width</param>
         /// <param name="checkAlly">Check ally heroes</param>
         /// <returns>true if collision found</returns>
-        public bool CheckHeroCollision(Vector2 from, Vector2 to, float width = 1f, bool checkAlly = false)
+        public bool CheckHeroCollision(Vector2 from, Vector2 to, Spell s, bool checkAlly = false)
         {
-            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, width);
+            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
             List<Obj_AI_Hero> listToCheck =  checkAlly ? HeroManager.AllHeroes : HeroManager.Enemies;
-            return listToCheck.AsParallel().Any(p => !ClipperWrapper.IsOutside(poly, p.ServerPosition.To2D()));
+            return listToCheck.AsParallel().Any(p => !ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(p.ServerPosition.To2D(), p.BoundingRadius))));
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace SPrediction
         /// <param name="to">End position</param>
         /// <param name="width">Width</param>
         /// <returns>true if collision found</returns>
-        public bool CheckWallCollision(Vector2 from, Vector2 to, float width = 1f)
+        public bool CheckWallCollision(Vector2 from, Vector2 to, Spell s)
         {
             var step = from.Distance(to) / 20;
             for (var i = 0; i < 20; i++)
@@ -99,7 +100,7 @@ namespace SPrediction
         /// <param name="to">End position</param>
         /// <param name="width">Width</param>
         /// <returns>true if collision found</returns>
-        public bool CheckYasuoWallCollision(Vector2 from, Vector2 to, float width = 1f)
+        public bool CheckYasuoWallCollision(Vector2 from, Vector2 to, Spell s)
         {
             if (Utils.TickCount - yasuoWallCastedTick > 4000)
                 return false;
@@ -116,7 +117,7 @@ namespace SPrediction
             Vector2 yasuoWallEnd = yasuoWallStart - yasuoWallWidth * yasuoWallDirection;
             
             Geometry.Polygon yasuoWallPoly = ClipperWrapper.DefineRectangle(yasuoWallStart, yasuoWallEnd, 5);
-            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, width);
+            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
 
             return ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(yasuoWallPoly), ClipperWrapper.MakePaths(poly));
         }
