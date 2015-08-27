@@ -84,6 +84,9 @@ namespace WhereDidHeGo
                     }
                 }
             }
+
+            if (Data.Teemo != null && !Data.Teemo.IsVisible)
+                Render.Circle.DrawCircle(Data.Teemo.Position, 75f, System.Drawing.Color.Green);
         }
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)

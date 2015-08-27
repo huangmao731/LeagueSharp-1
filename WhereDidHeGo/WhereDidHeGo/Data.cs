@@ -16,6 +16,7 @@ namespace WhereDidHeGo
         public static List<Tuple<float, List<Vector2>>> StealthPaths = new List<Tuple<float, List<Vector2>>>();
         public static List<Tuple<int, string>> StealthSpells = new List<Tuple<int, string>>();
         public static List<_sdata> AntiStealthSpells = new List<_sdata>();
+        public static Obj_AI_Hero Teemo;
         public static Menu Config;
 
         public static void Initialize()
@@ -65,6 +66,7 @@ namespace WhereDidHeGo
 
             Config.AddToMainMenu();
             #endregion
+            Teemo = HeroManager.Enemies.FirstOrDefault(p => p.ChampionName.ToLower() == "teemo");
         }
 
         public struct _sdata
