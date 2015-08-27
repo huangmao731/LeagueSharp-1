@@ -18,7 +18,7 @@ namespace WhereDidHeGo
         public static List<_sdata> AntiStealthSpells = new List<_sdata>();
         public static Menu Config;
 
-        static Data()
+        public static void Initialize()
         {
             #region Spell Databases
             StealthSpells.Add(new Tuple<int, string>(3, "akalismokebomb"));
@@ -36,7 +36,6 @@ namespace WhereDidHeGo
             AntiStealthSpells.Add(new _sdata { ChampionName = "twistedfate", Spell = new Spell(SpellSlot.R, 4000), StealthDetectionLevel = 3, SelfCast = true });
             AntiStealthSpells.Add(new _sdata { ChampionName = "fizz", Spell = new Spell(SpellSlot.W, 1275), StealthDetectionLevel = 2 });
             #endregion
-
             #region Config Menu
             Config = new Menu("Where Did He Go", "wheredidhego", true);
             Config.AddItem(new MenuItem("DRAWCIRCLE", "Show Where did enemy go").SetValue(true));

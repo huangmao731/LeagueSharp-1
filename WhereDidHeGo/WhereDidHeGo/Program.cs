@@ -24,6 +24,8 @@ namespace WhereDidHeGo
 
         static void Game_OnGameLoad(EventArgs args)
         {
+            Data.Initialize();
+            EventHandlers.Initialize();
             Notifications.AddNotification(String.Format("Where Did He Go Loaded !"), 3000);
         }
     }

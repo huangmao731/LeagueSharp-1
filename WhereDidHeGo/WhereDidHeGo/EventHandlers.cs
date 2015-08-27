@@ -11,7 +11,7 @@ namespace WhereDidHeGo
 {
     public class EventHandlers
     {
-        static EventHandlers()
+        public static void Initialize()
         {
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast; //for stealth spells
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate; //for lb passive & rengar ult
