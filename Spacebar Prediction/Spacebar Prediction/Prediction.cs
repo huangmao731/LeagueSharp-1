@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
  Copyright 2015 - 2015 SPrediction
  Prediction.cs is part of SPrediction
  
@@ -94,7 +94,7 @@ namespace SPrediction
             lock (LastSpells)
             {
                 LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
-                if (sender.IsMe && !args.SData.IsAutoAttack()  && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
+                if (sender.IsMe && !args.SData.IsAutoAttack() && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
                 {
                     if (sender.Spellbook.Spells.Find(p => p.Name == args.SData.Name).Slot == SpellSlot.Q && !LastSpells.Exists(p => p.name == args.SData.Name))
                     {
@@ -255,7 +255,7 @@ namespace SPrediction
             float tMin = flyTimeMin + s.Delay + Game.Ping / 2000f;
             float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f;
             float pathTime = 0f;
-            int[] x = new int[] {-1, -1};
+            int[] x = new int[] { -1, -1 };
 
             for (int i = 0; i < path.Count - 1; i++)
             {
@@ -461,7 +461,7 @@ namespace SPrediction
             }
 
             if (target is Obj_AI_Hero)
-                    hc = GetHitChance(t - LeftImmobileTime(target), ((Obj_AI_Hero)target).AvgMovChangeTime(), 0, 0);
+                hc = GetHitChance(t - LeftImmobileTime(target), ((Obj_AI_Hero)target).AvgMovChangeTime(), 0, 0);
 
             hc = HitChance.High;
             return target.ServerPosition.To2D();
@@ -587,7 +587,7 @@ namespace SPrediction
 
             if (t.HealthPercent > filterHPPercent)
                 return false;
-            
+
             if (rangeCheckFrom == null)
                 rangeCheckFrom = ObjectManager.Player.ServerPosition;
 
@@ -668,7 +668,7 @@ namespace SPrediction
                         float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
                         float movt = t.LastMovChangeTime();
                         float avgp = t.AvgPathLenght();
-                        
+
                         Vector2 pos = ObjectManager.Player.ServerPosition.To2D();
                         switch (s.Type)
                         {
@@ -1013,7 +1013,7 @@ namespace SPrediction
                     return HitChance.VeryHigh;
             }
             else
-               return HitChance.High;
+                return HitChance.High;
         }
 
         private static int IgnoreRectionDelay
@@ -1147,7 +1147,7 @@ namespace SPrediction
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float AvgPathLenght(this Obj_AI_Hero t)
         {
-            if(!blInitialized)
+            if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
 
             return EnemyInfo[t.NetworkId].AvgPathLenght;
