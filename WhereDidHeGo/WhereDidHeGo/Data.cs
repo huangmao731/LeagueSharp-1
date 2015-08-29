@@ -29,13 +29,13 @@ namespace WhereDidHeGo
             StealthSpells.Add(new Tuple<int, string>(1, "monkeykingdecoy"));
             StealthSpells.Add(new Tuple<int, string>(1, "hideinshadows"));
 
-            AntiStealthSpells.Add(new _sdata { ChampionName = "caitlyn", Spell = new Spell(SpellSlot.W, 800), StealthDetectionLevel = 1 });
-            AntiStealthSpells.Add(new _sdata { ChampionName = "kogmaw", Spell = new Spell(SpellSlot.R, 1200), StealthDetectionLevel = 1 }); //range + level * 300
-            AntiStealthSpells.Add(new _sdata { ChampionName = "leesin", Spell = new Spell(SpellSlot.Q, 1100), StealthDetectionLevel = 1 });
-            AntiStealthSpells.Add(new _sdata { ChampionName = "nidalee", Spell = new Spell(SpellSlot.W, 900), StealthDetectionLevel = 1 });
-            AntiStealthSpells.Add(new _sdata { ChampionName = "nocturne", Spell = new Spell(SpellSlot.Q, 1200), StealthDetectionLevel = 1 });
-            AntiStealthSpells.Add(new _sdata { ChampionName = "twistedfate", Spell = new Spell(SpellSlot.R, 4000), StealthDetectionLevel = 3, SelfCast = true });
-            AntiStealthSpells.Add(new _sdata { ChampionName = "fizz", Spell = new Spell(SpellSlot.W, 1275), StealthDetectionLevel = 2 });
+            AntiStealthSpells.Add(new _sdata { ChampionName = "caitlyn",    Spell = SpellSlot.W, SpellRange = 800,  StealthDetectionLevel = 1 });
+            AntiStealthSpells.Add(new _sdata { ChampionName = "kogmaw",     Spell = SpellSlot.R, SpellRange = 1200, StealthDetectionLevel = 1 }); //range + level * 300
+            AntiStealthSpells.Add(new _sdata { ChampionName = "leesin",     Spell = SpellSlot.Q, SpellRange = 1100, StealthDetectionLevel = 1 });
+            AntiStealthSpells.Add(new _sdata { ChampionName = "nidalee",    Spell = SpellSlot.W, SpellRange = 900,  StealthDetectionLevel = 1 });
+            AntiStealthSpells.Add(new _sdata { ChampionName = "nocturne",   Spell = SpellSlot.Q, SpellRange = 1200, StealthDetectionLevel = 1 });
+            AntiStealthSpells.Add(new _sdata { ChampionName = "twistedfate",Spell = SpellSlot.R, SpellRange = 4000, StealthDetectionLevel = 3, SelfCast = true });
+            AntiStealthSpells.Add(new _sdata { ChampionName = "fizz",       Spell = SpellSlot.W, SpellRange = 1275, StealthDetectionLevel = 2 });
             #endregion
             #region Config Menu
             Config = new Menu("Where Did He Go", "wheredidhego", true);
@@ -48,6 +48,10 @@ namespace WhereDidHeGo
             Menu antiStealth = new Menu("Anti-Stealth", "wdhgantistealth");
             antiStealth.AddItem(new MenuItem("USEVISIONWARD", "Use Vision Ward").SetValue(true));
             antiStealth.AddItem(new MenuItem("USEORACLESLENS", "Use Oracle's Lens").SetValue(true));
+            antiStealth.AddItem(new MenuItem("USELIGHTBRINGER", "Use Lightbringer").SetValue(true));
+            antiStealth.AddItem(new MenuItem("USEHEXTECHSWEEPER", "Use Hextech Sweeper").SetValue(true));
+            antiStealth.AddItem(new MenuItem("USESNOWBALL", "Use ARAM Snowball").SetValue(true));
+
             Config.AddSubMenu(antiStealth);
 
             var spells = AntiStealthSpells.Where(p => p.ChampionName == ObjectManager.Player.ChampionName.ToLower());
@@ -56,9 +60,9 @@ namespace WhereDidHeGo
                 Menu antiStealthSpells = new Menu("Reveal Spells", "wdhgrevealspells");
                 foreach (var spell in spells)
                 {
-                    Menu antiStealthSpell = new Menu(String.Format("{0} ({1})", ObjectManager.Player.Spellbook.GetSpell(spell.Spell.Slot).Name, spell.Spell.Slot), "wdhg" + spell.Spell.Slot.ToString());
-                    antiStealthSpell.AddItem(new MenuItem(String.Format("DETECT{0}", spell.Spell.Slot.ToString()), "Detection Level").SetValue(new Slider(spell.StealthDetectionLevel, 1, 3)));
-                    antiStealthSpell.AddItem(new MenuItem(String.Format("USE{0}", spell.Spell.Slot.ToString()), "Enabled").SetValue(true));
+                    Menu antiStealthSpell = new Menu(String.Format("{0} ({1})", ObjectManager.Player.Spellbook.GetSpell(spell.Spell).Name, spell.Spell), "wdhg" + spell.Spell.ToString());
+                    antiStealthSpell.AddItem(new MenuItem(String.Format("DETECT{0}", spell.Spell.ToString()), "Detection Level").SetValue(new Slider(spell.StealthDetectionLevel, 1, 3)));
+                    antiStealthSpell.AddItem(new MenuItem(String.Format("USE{0}", spell.Spell.ToString()), "Enabled").SetValue(true));
                     antiStealthSpells.AddSubMenu(antiStealthSpell);
                 }
                 Config.AddSubMenu(antiStealthSpells);
@@ -72,7 +76,8 @@ namespace WhereDidHeGo
         public struct _sdata
         {
             public string ChampionName;
-            public Spell Spell;
+            public SpellSlot Spell;
+            public float SpellRange;
             public int StealthDetectionLevel;
             public bool SelfCast;
         }
