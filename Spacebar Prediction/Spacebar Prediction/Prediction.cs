@@ -76,7 +76,8 @@ namespace SPrediction
             {
                 predMenu = new Menu("SPrediction", "SPRED");
                 predMenu.AddItem(new MenuItem("PREDICTONLIST", "Prediction Method").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
-                predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, -200, 200)));
+                predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
+                predMenu.AddItem(new MenuItem("SPREDDELAY", "Spell Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 predMenu.AddItem(new MenuItem("SPREDHC", "Count HitChance").SetValue<KeyBind>(new KeyBind(32, KeyBindType.Press)));
                 predMenu.AddItem(new MenuItem("SPREDDRAWINGS", "Enable Drawings").SetValue(true));
                 mainMenu.AddSubMenu(predMenu);
@@ -178,7 +179,7 @@ namespace SPrediction
                     flyTime = targetDistance / s.Speed;
             }
 
-            float t = flyTime + s.Delay + Game.Ping / 2000f;
+            float t = flyTime + s.Delay + Game.Ping / 2000f + SpellDelay;
             float distance = t * target.MoveSpeed;
             hc = GetHitChance(t * 1000f, avgt, movt, avgp);
 
@@ -252,8 +253,8 @@ namespace SPrediction
                 flyTimeMax = s.Range / s.Speed;
             }
 
-            float tMin = flyTimeMin + s.Delay + Game.Ping / 2000f;
-            float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f;
+            float tMin = flyTimeMin + s.Delay + Game.Ping / 2000f + SpellDelay;
+            float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f + SpellDelay;
             float pathTime = 0f;
             int[] x = new int[] { -1, -1 };
 
@@ -357,7 +358,7 @@ namespace SPrediction
                     flyTime = targetDistance / s.Speed;
             }
 
-            float t = flyTime + s.Delay + Game.Ping / 1000f;
+            float t = flyTime + s.Delay + Game.Ping / 1000f + SpellDelay;
             float distance = t * target.MoveSpeed;
 
             hc = GetHitChance(t * 1000f, avgt, movt, avgp);
@@ -1016,13 +1017,23 @@ namespace SPrediction
                 return HitChance.High;
         }
 
-        private static int IgnoreRectionDelay
+        private static int IgnoreReactionDelay
         {
             get
             {
                 if (predMenu == null)
                     return 0;
                 return predMenu.Item("SPREDREACTIONDELAY").GetValue<Slider>().Value;
+            }
+        }
+
+        private static int SpellDelay
+        {
+            get
+            {
+                if (predMenu == null)
+                    return 0;
+                return predMenu.Item("SPREDDELAY").GetValue<Slider>().Value;
             }
         }
 
@@ -1141,7 +1152,7 @@ namespace SPrediction
             if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
 
-            return EnemyInfo[t.NetworkId].AvgTick + IgnoreRectionDelay;
+            return EnemyInfo[t.NetworkId].AvgTick + IgnoreReactionDelay;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

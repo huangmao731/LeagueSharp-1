@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
  Copyright 2015 - 2015 SPrediction
  Prediction.cs is part of SPrediction
  
@@ -77,6 +77,7 @@ namespace SPrediction
                 predMenu = new Menu("SPrediction", "SPRED");
                 predMenu.AddItem(new MenuItem("PREDICTONLIST", "Prediction Method").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
                 predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
+                predMenu.AddItem(new MenuItem("SPREDDELAY", "Spell Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 predMenu.AddItem(new MenuItem("SPREDHC", "Count HitChance").SetValue<KeyBind>(new KeyBind(32, KeyBindType.Press)));
                 predMenu.AddItem(new MenuItem("SPREDDRAWINGS", "Enable Drawings").SetValue(true));
                 mainMenu.AddSubMenu(predMenu);
@@ -94,7 +95,7 @@ namespace SPrediction
             lock (LastSpells)
             {
                 LastSpells.RemoveAll(p => Environment.TickCount - p.tick > 2000);
-                if (sender.IsMe && !args.SData.IsAutoAttack()  && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
+                if (sender.IsMe && !args.SData.IsAutoAttack() && predMenu.Item("SPREDHC").GetValue<KeyBind>().Active)
                 {
                     if (sender.Spellbook.Spells.Find(p => p.Name == args.SData.Name).Slot == SpellSlot.Q && !LastSpells.Exists(p => p.name == args.SData.Name))
                     {
@@ -178,7 +179,7 @@ namespace SPrediction
                     flyTime = targetDistance / s.Speed;
             }
 
-            float t = flyTime + s.Delay + Game.Ping / 2000f;
+            float t = flyTime + s.Delay + Game.Ping / 2000f + SpellDelay;
             float distance = t * target.MoveSpeed;
             hc = GetHitChance(t * 1000f, avgt, movt, avgp);
 
@@ -252,10 +253,10 @@ namespace SPrediction
                 flyTimeMax = s.Range / s.Speed;
             }
 
-            float tMin = flyTimeMin + s.Delay + Game.Ping / 2000f;
-            float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f;
+            float tMin = flyTimeMin + s.Delay + Game.Ping / 2000f + SpellDelay;
+            float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f + SpellDelay;
             float pathTime = 0f;
-            int[] x = new int[] {-1, -1};
+            int[] x = new int[] { -1, -1 };
 
             for (int i = 0; i < path.Count - 1; i++)
             {
@@ -357,7 +358,7 @@ namespace SPrediction
                     flyTime = targetDistance / s.Speed;
             }
 
-            float t = flyTime + s.Delay + Game.Ping / 1000f;
+            float t = flyTime + s.Delay + Game.Ping / 1000f + SpellDelay;
             float distance = t * target.MoveSpeed;
 
             hc = GetHitChance(t * 1000f, avgt, movt, avgp);
@@ -461,7 +462,7 @@ namespace SPrediction
             }
 
             if (target is Obj_AI_Hero)
-                    hc = GetHitChance(t - LeftImmobileTime(target), ((Obj_AI_Hero)target).AvgMovChangeTime(), 0, 0);
+                hc = GetHitChance(t - LeftImmobileTime(target), ((Obj_AI_Hero)target).AvgMovChangeTime(), 0, 0);
 
             hc = HitChance.High;
             return target.ServerPosition.To2D();
@@ -487,7 +488,7 @@ namespace SPrediction
                 return s.Cast(t) == Spell.CastStates.SuccessfullyCasted;
 
             #region if common prediction selected
-            if (predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
+            if (predMenu != null && predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
             {
                 var pout = s.GetPrediction(t, minHit > 1);
 
@@ -528,7 +529,7 @@ namespace SPrediction
                     else
                         pos = GetPrediction(t, s, waypoints, avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
 
-                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + (s.Type == SkillshotType.SkillshotCircle ? s.Width / 2 : 0)) //out of range
+                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + (s.Type == SkillshotType.SkillshotCircle ? s.Width / 2 : 0) - t.BoundingRadius) //out of range
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
@@ -587,7 +588,7 @@ namespace SPrediction
 
             if (t.HealthPercent > filterHPPercent)
                 return false;
-            
+
             if (rangeCheckFrom == null)
                 rangeCheckFrom = ObjectManager.Player.ServerPosition;
 
@@ -601,7 +602,7 @@ namespace SPrediction
                     float avgp = t.AvgPathLenght();
                     Vector2 pos = GetArcPrediction(t, s, t.GetWaypoints(), avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
 
-                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + s.Width / 2) //out of range
+                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + s.Width / 2 - t.BoundingRadius) //out of range
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
@@ -668,7 +669,7 @@ namespace SPrediction
                         float avgt = t.AvgMovChangeTime() + reactionIgnoreDelay;
                         float movt = t.LastMovChangeTime();
                         float avgp = t.AvgPathLenght();
-                        
+
                         Vector2 pos = ObjectManager.Player.ServerPosition.To2D();
                         switch (s.Type)
                         {
@@ -1013,16 +1014,26 @@ namespace SPrediction
                     return HitChance.VeryHigh;
             }
             else
-               return HitChance.High;
+                return HitChance.High;
         }
 
-        private static int IgnoreRectionDelay
+        private static int IgnoreReactionDelay
         {
             get
             {
                 if (predMenu == null)
                     return 0;
                 return predMenu.Item("SPREDREACTIONDELAY").GetValue<Slider>().Value;
+            }
+        }
+
+        private static int SpellDelay
+        {
+            get
+            {
+                if (predMenu == null)
+                    return 0;
+                return predMenu.Item("SPREDDELAY").GetValue<Slider>().Value;
             }
         }
 
@@ -1141,13 +1152,13 @@ namespace SPrediction
             if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
 
-            return EnemyInfo[t.NetworkId].AvgTick + IgnoreRectionDelay;
+            return EnemyInfo[t.NetworkId].AvgTick + IgnoreReactionDelay;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float AvgPathLenght(this Obj_AI_Hero t)
         {
-            if(!blInitialized)
+            if (!blInitialized)
                 throw new InvalidOperationException("Prediction is not initalized");
 
             return EnemyInfo[t.NetworkId].AvgPathLenght;
