@@ -487,7 +487,7 @@ namespace SPrediction
                 return s.Cast(t) == Spell.CastStates.SuccessfullyCasted;
 
             #region if common prediction selected
-            if (predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
+            if (predMenu != null && predMenu.Item("PREDICTONLIST").GetValue<StringList>().SelectedIndex == 1)
             {
                 var pout = s.GetPrediction(t, minHit > 1);
 
@@ -528,7 +528,7 @@ namespace SPrediction
                     else
                         pos = GetPrediction(t, s, waypoints, avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
 
-                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + (s.Type == SkillshotType.SkillshotCircle ? s.Width / 2 : 0)) //out of range
+                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + (s.Type == SkillshotType.SkillshotCircle ? s.Width / 2 : 0) - t.BoundingRadius) //out of range
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
@@ -601,7 +601,7 @@ namespace SPrediction
                     float avgp = t.AvgPathLenght();
                     Vector2 pos = GetArcPrediction(t, s, t.GetWaypoints(), avgt, movt, avgp, out predictedhc, rangeCheckFrom.Value);
 
-                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + s.Width / 2) //out of range
+                    if (rangeCheckFrom.Value.To2D().Distance(pos) > s.Range + s.Width / 2 - t.BoundingRadius) //out of range
                     {
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
