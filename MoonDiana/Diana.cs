@@ -213,7 +213,7 @@ namespace MoonDiana
                 var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).OrderBy(r => r.ServerPosition.Distance(Game.CursorPos)).FirstOrDefault();
                 if (minion == null)
                 {
-                    minion = MinionManager.GetMinions(Spells[Q].Range - 20, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                    minion = MinionManager.GetMinions(Spells[Q].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).ThenByDescending(t => t.Health).FirstOrDefault();
                     if (minion != null && !m_moon_r_casted)
                     {
                         Spells[Q].Cast(minion.ServerPosition);
@@ -254,10 +254,10 @@ namespace MoonDiana
 
         public void Flee()
         {
-            var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+            var minion = MinionManager.GetMinions(Spells[R].Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).Where(p => p.HasBuff("dianamoonlight")).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
             if (minion == null)
             {
-                minion = MinionManager.GetMinions(Spells[Q].Range - 20, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                minion = MinionManager.GetMinions(Spells[Q].Range - 20, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.None).Where(p => p.Health > Spells[Q].GetDamage(p)).OrderByDescending(q => q.ServerPosition.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
                 if (minion != null)
                     Spells[Q].Cast(minion.ServerPosition);
             }
