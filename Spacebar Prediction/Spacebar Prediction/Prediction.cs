@@ -484,6 +484,9 @@ namespace SPrediction
             if (rangeCheckFrom == null)
                 rangeCheckFrom = ObjectManager.Player.ServerPosition;
 
+            if (t == null)
+                return s.Cast();
+
             if (!s.IsSkillshot)
                 return s.Cast(t) == Spell.CastStates.SuccessfullyCasted;
 

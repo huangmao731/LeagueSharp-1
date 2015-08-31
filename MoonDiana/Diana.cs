@@ -153,7 +153,7 @@ namespace MoonDiana
         //r q w r e
         public void Misaya()
         {
-            if (m_target == null && ComboReady())
+            if (m_target == null && Spells[Q].IsReady() && Spells[R].IsReady())
                 m_target = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Magical);
 
             if (!LXOrbwalkerEnabled)

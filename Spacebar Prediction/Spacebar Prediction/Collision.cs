@@ -54,7 +54,7 @@ namespace SPrediction
         public bool CheckCollision(Vector2 from, Vector2 to, Spell s, bool checkMinion = true, bool checkHero = false, bool checkYasuoWall = true, bool checkHeroAlly = false, bool checkWall = false)
         {
             return (checkMinion && CheckMinionCollision(from, to, s)) ||
-                    (checkHero && CheckHeroCollision(from, to, s, checkHeroAlly)) ||
+                    (checkHero && CheckHeroCollision(from, to, s.Width, checkHeroAlly)) ||
                     (checkYasuoWall && CheckYasuoWallCollision(from, to, s)) ||
                     (checkWall && CheckWallCollision(from, to, s));
         }
@@ -81,9 +81,9 @@ namespace SPrediction
         /// <param name="width">Width</param>
         /// <param name="checkAlly">Check ally heroes</param>
         /// <returns>true if collision found</returns>
-        public bool CheckHeroCollision(Vector2 from, Vector2 to, Spell s, bool checkAlly = false)
+        public bool CheckHeroCollision(Vector2 from, Vector2 to, float width, bool checkAlly = false)
         {
-            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, s.Width);
+            Geometry.Polygon poly = ClipperWrapper.DefineRectangle(from, to, width);
             List<Obj_AI_Hero> listToCheck =  checkAlly ? HeroManager.AllHeroes : HeroManager.Enemies;
             return listToCheck.AsParallel().Any(p => ClipperWrapper.IsIntersects(ClipperWrapper.MakePaths(poly), ClipperWrapper.MakePaths(ClipperWrapper.DefineCircle(p.ServerPosition.To2D(), p.BoundingRadius))));
         }
