@@ -103,6 +103,7 @@ namespace MoonDiana
                                 Orbwalker.Enable();
                             }
                         };
+            misc.AddItem(new MenuItem("MKILLABLEDRAW", "Disable Notifier Drawings").SetValue(false));
             LXOrbwalker.AddToMenu(misc.SubMenu("LXOrbwalker Settings"));
 
             Config.AddSubMenu(combo);
@@ -454,23 +455,26 @@ namespace MoonDiana
 
         public void BeforeDraw()
         {
-            if (ComboReady())
-                Text.DrawText(null, "Misaya & Moon Combo Is Ready", (int)(ObjectManager.Player.HPBarPosition.X + ObjectManager.Player.BoundingRadius / 2 - 10), (int)(ObjectManager.Player.HPBarPosition.Y - 20), SharpDX.Color.Red);
-
-            if (m_target != null)
+            if (!Config.Item("MKILLABLEDRAW").GetValue<bool>())
             {
-                if (Config.Item("MMISAYA").GetValue<KeyBind>().Active)
-                    Text.DrawText(null, "Misaya Combo Target", (int)(m_target.HPBarPosition.X + m_target.BoundingRadius / 2 - 10), (int)(m_target.HPBarPosition.Y - 20), SharpDX.Color.Yellow);
-                else if(Config.Item("MMOON").GetValue<KeyBind>().Active)
-                    Text.DrawText(null, "Moon Combo Target", (int)(m_target.HPBarPosition.X + m_target.BoundingRadius / 2 - 10), (int)(m_target.HPBarPosition.Y - 20), SharpDX.Color.Yellow);
-            }
+                if (ComboReady())
+                    Text.DrawText(null, "Misaya & Moon Combo Is Ready", (int)(ObjectManager.Player.HPBarPosition.X + ObjectManager.Player.BoundingRadius / 2 - 10), (int)(ObjectManager.Player.HPBarPosition.Y - 20), SharpDX.Color.Red);
 
-            foreach (var enemy in HeroManager.Enemies)
-            {
-                if (enemy.Health < CalculateComboDamage(enemy))
+                if (m_target != null)
                 {
-                    var killable_pos = Drawing.WorldToScreen(enemy.Position);
-                    Drawing.DrawText((int)killable_pos.X - 20, (int)killable_pos.Y + 35, System.Drawing.Color.Red, "Killable");
+                    if (Config.Item("MMISAYA").GetValue<KeyBind>().Active)
+                        Text.DrawText(null, "Misaya Combo Target", (int)(m_target.HPBarPosition.X + m_target.BoundingRadius / 2 - 10), (int)(m_target.HPBarPosition.Y), SharpDX.Color.Yellow);
+                    else if (Config.Item("MMOON").GetValue<KeyBind>().Active)
+                        Text.DrawText(null, "Moon Combo Target", (int)(m_target.HPBarPosition.X + m_target.BoundingRadius / 2 - 10), (int)(m_target.HPBarPosition.Y), SharpDX.Color.Yellow);
+                }
+
+                foreach (var enemy in HeroManager.Enemies)
+                {
+                    if (!enemy.IsDead && enemy.Health < CalculateComboDamage(enemy))
+                    {
+                        var killable_pos = Drawing.WorldToScreen(enemy.Position);
+                        Drawing.DrawText((int)killable_pos.X - 20, (int)killable_pos.Y + 35, System.Drawing.Color.Red, "Killable");
+                    }
                 }
             }
         }
