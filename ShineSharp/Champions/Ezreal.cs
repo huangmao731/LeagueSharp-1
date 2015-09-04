@@ -106,7 +106,7 @@ namespace ShineSharp.Champions
         public void BeforeOrbwalk()
         {
             #region Auto Harass
-            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret())
+            if (Spells[Q].IsReady() && Config.Item("MAUTOQ").GetValue<bool>() && !ObjectManager.Player.UnderTurret() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
             {
                 var t = (from enemy in HeroManager.Enemies where enemy.IsValidTarget(Spells[Q].Range) orderby TargetSelector.GetPriority(enemy) descending select enemy).FirstOrDefault();
                 if (t != null)
