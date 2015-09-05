@@ -40,7 +40,7 @@ namespace SPrediction
         private static Menu predMenu;
         private static SPrediction.Collision Collision;
 
-        private static int lastDrawHitchance;
+        private static string lastDrawHitchance;
         private static Vector2 lastDrawPos;
         private static Vector2 lastDrawDirection;
         private static int lastDrawTick;
@@ -286,15 +286,17 @@ namespace SPrediction
                     for (int k = x[0]; k < x[1]; k++)
                     {
                         Vector2 direction = (path[k + 1] - path[k]).Normalized();
-                        float distance = path[k].Distance(path[k]) / 40;
-                        for (int i = 0; i < 40; i++)
+                        float distance = s.Width / 2f;
+                        int steps = (int)Math.Ceiling(path[k].Distance(path[k + 1]) / distance);
+                        for (int i = 0; i < steps; i++)
                         {
-                            Vector2 center = path[k] + (direction * distance * i) + (direction * distance / 2);
+                            Vector2 pA = path[k] + (direction * distance * i);
+                            Vector2 pB = path[k] + (direction * distance * (i + 1));
+                            Vector2 center = pA + pB / 2f;
+
                             float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(center) / s.Speed : 0f;
                             float t = flytime + s.Delay;
 
-                            Vector2 pA = center - direction * s.Width / 2;
-                            Vector2 pB = center + direction * s.Width / 2;
                             float arriveTimeA = target.ServerPosition.To2D().Distance(pA) / target.MoveSpeed;
                             float arriveTimeB = target.ServerPosition.To2D().Distance(pB) / target.MoveSpeed;
 
@@ -560,13 +562,13 @@ namespace SPrediction
 
                     lastDrawTick = Utils.TickCount;
                     lastDrawPos = pos;
-                    lastDrawHitchance = (int)(100f / (HitChance.VeryHigh - HitChance.Impossible)) * (predictedhc - HitChance.Impossible);
+                    lastDrawHitchance = predictedhc.ToString();
                     lastDrawDirection = (pos - rangeCheckFrom.Value.To2D()).Normalized().Perpendicular();
                     lastDrawWidth = (int)s.Width;
 
                     if (s.Collision && Collision.CheckCollision(rangeCheckFrom.Value.To2D(), pos, s, true, false, true))
                     {
-                        lastDrawHitchance = (int)HitChance.Collision;
+                        lastDrawHitchance = HitChance.Collision.ToString();
                         Monitor.Pulse(EnemyInfo[t.NetworkId].m_lock);
                         return false;
                     }
@@ -1128,7 +1130,7 @@ namespace SPrediction
                     Vector2 startPos = Drawing.WorldToScreen((lastDrawPos - lastDrawDirection * lastDrawWidth).To3D());
                     Vector2 endPos = Drawing.WorldToScreen((lastDrawPos + lastDrawDirection * lastDrawWidth).To3D());
                     Drawing.DrawLine(startPos, endPos, 3, System.Drawing.Color.Gold);
-                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, lastDrawHitchance == (int)HitChance.Collision ? "Collision" : "%" + lastDrawHitchance.ToString());
+                    Drawing.DrawText(centerPos.X, centerPos.Y, System.Drawing.Color.Red, lastDrawHitchance);
                 }
 
                 Drawing.DrawText(Drawing.Width - 200, 0, System.Drawing.Color.Red, String.Format("Casted Spell Count: {0}", castCount));
