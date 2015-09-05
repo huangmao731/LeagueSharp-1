@@ -42,6 +42,7 @@ namespace SPrediction
 
         private static string lastDrawHitchance;
         private static Vector2 lastDrawPos;
+        private static Vector2 __pos;
         private static Vector2 lastDrawDirection;
         private static int lastDrawTick;
         private static int lastDrawWidth;
@@ -179,7 +180,7 @@ namespace SPrediction
                     flyTime = targetDistance / s.Speed;
             }
 
-            float t = flyTime + s.Delay + Game.Ping / 2000f + SpellDelay;
+            float t = flyTime + s.Delay + Game.Ping / 2000f + SpellDelay / 1000f;
             float distance = t * target.MoveSpeed;
             hc = GetHitChance(t * 1000f, avgt, movt, avgp);
 
@@ -258,8 +259,8 @@ namespace SPrediction
                 }
 
                 //PATCH WARNING
-                float tMin = 0f + s.Delay + Game.Ping / 2000f + SpellDelay; //0f => flyTimeMin
-                float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f + SpellDelay;
+                float tMin = 0f + s.Delay + Game.Ping / 2000f + SpellDelay / 1000f; //0f => flyTimeMin
+                float tMax = flyTimeMax + s.Delay + Game.Ping / 1000f + SpellDelay / 1000f;
                 float pathTime = 0f;
                 int[] x = new int[] { -1, -1 };
 
@@ -278,24 +279,22 @@ namespace SPrediction
                     pathTime += t;
                 }
 
-                //improve if enemy coming closer to me 
-
                 //PATCH WARNING
                 if (x[0] != -1 && x[1] != -1)
                 {
-                    for (int k = x[0]; k < x[1]; k++)
+                    for (int k = x[0]; k <= x[1]; k++)
                     {
                         Vector2 direction = (path[k + 1] - path[k]).Normalized();
-                        float distance = s.Width / 2f;
-                        int steps = (int)Math.Ceiling(path[k].Distance(path[k + 1]) / distance);
+                        float distance = s.Width;
+                        int steps = (int)Math.Floor(path[k].Distance(path[k + 1]) / distance);
                         for (int i = 0; i < steps; i++)
                         {
                             Vector2 pA = path[k] + (direction * distance * i);
                             Vector2 pB = path[k] + (direction * distance * (i + 1));
-                            Vector2 center = pA + pB / 2f;
-
+                            Vector2 center = (pA + pB) / 2f;
+                            
                             float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(center) / s.Speed : 0f;
-                            float t = flytime + s.Delay;
+                            float t = flytime + s.Delay + Game.Ping / 2000f + SpellDelay / 1000f;
 
                             float arriveTimeA = target.ServerPosition.To2D().Distance(pA) / target.MoveSpeed;
                             float arriveTimeB = target.ServerPosition.To2D().Distance(pB) / target.MoveSpeed;
@@ -305,6 +304,14 @@ namespace SPrediction
                                 hc = GetHitChance(t, avgt, movt, avgp);
                                 return center;
                             }
+                        }
+
+                        if (steps == 0)
+                        {
+                            float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(path[x[1]]) / s.Speed : 0f;
+                            float t = flytime + s.Delay + Game.Ping / 2000f + SpellDelay / 1000f;
+                            hc = GetHitChance(t, avgt, movt, avgp);
+                            return path[x[1]];
                         }
                     }
                 }
@@ -379,7 +386,7 @@ namespace SPrediction
                     flyTime = targetDistance / s.Speed;
             }
 
-            float t = flyTime + s.Delay + Game.Ping / 1000f + SpellDelay;
+            float t = flyTime + s.Delay + Game.Ping / 1000f + SpellDelay / 1000f;
             float distance = t * target.MoveSpeed;
 
             hc = GetHitChance(t * 1000f, avgt, movt, avgp);
@@ -1026,7 +1033,7 @@ namespace SPrediction
         {
             if (avgp > 400)
             {
-                if (movt > 100)
+                if (movt > 50)
                 {
                     if (avgt - movt >= t * 1.25f)
                         return HitChance.High;
@@ -1136,6 +1143,10 @@ namespace SPrediction
                 Drawing.DrawText(Drawing.Width - 200, 0, System.Drawing.Color.Red, String.Format("Casted Spell Count: {0}", castCount));
                 Drawing.DrawText(Drawing.Width - 200, 20, System.Drawing.Color.Red, String.Format("Hit Spell Count: {0}", hitCount));
                 Drawing.DrawText(Drawing.Width - 200, 40, System.Drawing.Color.Red, String.Format("Hitchance (%): {0}%", (((float)hitCount / (castCount + 1)) * 100).ToString("00.00")));
+
+                if (__pos != Vector2.Zero)
+                    Drawing.DrawCircle(__pos.To3D(), 70, System.Drawing.Color.Red);
+
             }
         }
 

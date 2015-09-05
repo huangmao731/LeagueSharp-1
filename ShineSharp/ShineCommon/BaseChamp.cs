@@ -124,31 +124,7 @@ namespace ShineCommon
 
         public void CastSkillshot(Obj_AI_Hero t, Spell s, HitChance hc = HitChance.High)
         {
-            if (!s.IsSkillshot)
-                return;
-
-            PredictionOutput p = s.GetPrediction(t);
-            if (s.Collision)
-            {
-                for (int i = 0; i < p.CollisionObjects.Count; i++)
-                    if (!p.CollisionObjects[i].IsDead && (p.CollisionObjects[i].IsEnemy || p.CollisionObjects[i].IsMinion))
-                        return;
-            }
-
-            if ((t.HasBuffOfType(BuffType.Slow) && p.Hitchance >= HitChance.Medium) || p.Hitchance == HitChance.Immobile)
-                s.Cast(p.CastPosition);
-            else if (t.IsRecalling())
-                s.Cast(t.ServerPosition);
-            else
-            {
-                if (s.Type != SkillshotType.SkillshotCone)
-                {
-                    if (s.IsReady())
-                        s.SPredictionCast(t, hc);
-                }
-                else
-                    s.Cast(p.CastPosition);
-            }
+            s.SPredictionCast(t, hc);
         }
 
 
