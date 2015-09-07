@@ -29,9 +29,12 @@ namespace SPredictioner
                 lock (m_lock)
                 {
                     SpellSlot slot = ObjectManager.Player.GetSpellSlot(args.SData.Name);
+                    if (!ShineCommon.Utility.IsValidSlot(slot))
+                        return;
+
                     if (!handleEvent[(int)slot])
                     {
-                        if (ShineCommon.Utility.IsValidSlot(slot) && SPredictioner.Spells[(int)slot] != null)
+                        if (SPredictioner.Spells[(int)slot] != null)
                             handleEvent[(int)slot] = true;
                     }
                 }
@@ -46,7 +49,10 @@ namespace SPredictioner
                 {
                     if (SPredictioner.Config.Item("ENABLED").GetValue<bool>() && (SPredictioner.Config.Item("COMBOKEY").GetValue<KeyBind>().Active || SPredictioner.Config.Item("HARASSKEY").GetValue<KeyBind>().Active))
                     {
-                        if (!ShineCommon.Utility.IsValidSlot(args.Slot) && SPredictioner.Spells[(int)args.Slot] == null)
+                        if (!ShineCommon.Utility.IsValidSlot(args.Slot))
+                            return;
+
+                        if (SPredictioner.Spells[(int)args.Slot] == null)
                             return;
 
                         if (handleEvent[(int)args.Slot])
