@@ -15,6 +15,13 @@ namespace SPredictioner
         private static bool[] handleEvent = { true, true, true, true };
         private static object m_lock = new object();
 
+        
+
+        public static void Game_OnGameLoad(EventArgs args)
+        {
+            SPredictioner.Initialize();
+        }
+
         public static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe)

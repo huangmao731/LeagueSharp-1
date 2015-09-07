@@ -13,7 +13,12 @@ namespace SPredictioner
     {
         static void Main(string[] args)
         {
-            SPredictioner.Initialize();
+            if (Game.Mode == GameMode.Running)
+            {
+                EventHandlers.Game_OnGameLoad(null);
+            }
+
+            CustomEvents.Game.OnGameLoad += EventHandlers.Game_OnGameLoad;
         }
     }
 }
