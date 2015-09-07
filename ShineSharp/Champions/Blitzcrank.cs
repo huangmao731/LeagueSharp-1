@@ -95,7 +95,7 @@ namespace ShineSharp.Champions
             Spells[R] = new Spell(SpellSlot.R, 550f);
         }
 
-
+        
         public void BeforeOrbwalk()
         {
             #region Auto Harass

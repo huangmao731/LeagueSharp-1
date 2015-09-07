@@ -233,7 +233,7 @@ namespace SPrediction
                         hc = HitChance.VeryHigh;
                         return target.ServerPosition.To2D();
                     }
-
+                    
                     //to do: find a fuking logic
                     if (avgp < 400 && movt < 100)
                     {
