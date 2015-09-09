@@ -42,7 +42,6 @@ namespace SPrediction
 
         private static string lastDrawHitchance;
         private static Vector2 lastDrawPos;
-        private static Vector2 __pos;
         private static Vector2 lastDrawDirection;
         private static int lastDrawTick;
         private static int lastDrawWidth;
@@ -233,7 +232,7 @@ namespace SPrediction
                         hc = HitChance.VeryHigh;
                         return target.ServerPosition.To2D();
                     }
-                    
+
                     //to do: find a fuking logic
                     if (avgp < 400 && movt < 100)
                     {
@@ -292,7 +291,7 @@ namespace SPrediction
                             Vector2 pA = path[k] + (direction * distance * i);
                             Vector2 pB = path[k] + (direction * distance * (i + 1));
                             Vector2 center = (pA + pB) / 2f;
-                            
+
                             float flytime = s.Speed != 0 ? rangeCheckFrom.To2D().Distance(center) / s.Speed : 0f;
                             float t = flytime + s.Delay + Game.Ping / 2000f + SpellDelay / 1000f;
 
@@ -1142,11 +1141,7 @@ namespace SPrediction
 
                 Drawing.DrawText(Drawing.Width - 200, 0, System.Drawing.Color.Red, String.Format("Casted Spell Count: {0}", castCount));
                 Drawing.DrawText(Drawing.Width - 200, 20, System.Drawing.Color.Red, String.Format("Hit Spell Count: {0}", hitCount));
-                Drawing.DrawText(Drawing.Width - 200, 40, System.Drawing.Color.Red, String.Format("Hitchance (%): {0}%", (((float)hitCount / (castCount + 1)) * 100).ToString("00.00")));
-
-                if (__pos != Vector2.Zero)
-                    Drawing.DrawCircle(__pos.To3D(), 70, System.Drawing.Color.Red);
-
+                Drawing.DrawText(Drawing.Width - 200, 40, System.Drawing.Color.Red, String.Format("Hitchance (%): {0}%", castCount > 0 ? (((float)hitCount / castCount) * 100).ToString("00.00") : "n/a"));
             }
         }
 
