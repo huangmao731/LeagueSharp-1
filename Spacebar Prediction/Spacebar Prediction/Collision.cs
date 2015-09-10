@@ -10,13 +10,11 @@ using SharpDX;
 
 namespace SPrediction
 {
-    public class Collision
+    internal class Collision
     {
         private static int yasuoWallCastedTick;
         private static int yasuoWallLevel;
-        private static Vector2 yasuoWallCastedPos;
-        private static List<Tuple<int, Geometry.Polygon>> collisionDrawings = new List<Tuple<int, Geometry.Polygon>>();
-        
+        private static Vector2 yasuoWallCastedPos;        
 
         /// <summary>
         /// Constructor
@@ -24,19 +22,6 @@ namespace SPrediction
         public Collision()
         {
             Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
-            Drawing.OnDraw += Drawing_OnDraw;
-        }
-
-        void Drawing_OnDraw(EventArgs args)
-        {
-            lock (collisionDrawings)
-            {
-                collisionDrawings.RemoveAll(p => Environment.TickCount - p.Item1 > 4000);
-                for (int i = 0; i < collisionDrawings.Count; i++)
-                {
-                    collisionDrawings[i].Item2.Draw();
-                }
-            }
         }
 
         /// <summary>
@@ -97,7 +82,7 @@ namespace SPrediction
         /// <returns>true if collision found</returns>
         public bool CheckWallCollision(Vector2 from, Vector2 to, Spell s)
         {
-            var step = from.Distance(to) / 20;
+            float step = from.Distance(to) / 20;
             for (var i = 0; i < 20; i++)
             {
                 var p = from.Extend(to, step * i);

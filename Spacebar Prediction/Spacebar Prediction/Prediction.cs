@@ -38,13 +38,17 @@ namespace SPrediction
         public static Dictionary<int, EnemyData> EnemyInfo = new Dictionary<int, EnemyData>();
         private static bool blInitialized;
         private static Menu predMenu;
-        private static SPrediction.Collision Collision;
+        public static SPrediction.Collision Collision;
 
+        #region stuff for prediction drawings
         private static string lastDrawHitchance;
         private static Vector2 lastDrawPos;
         private static Vector2 lastDrawDirection;
         private static int lastDrawTick;
         private static int lastDrawWidth;
+        #endregion
+
+        #region stuff for hitchance drawings
         private static int hitCount = 0;
         private static int castCount = 0;
 
@@ -61,6 +65,7 @@ namespace SPrediction
         }
 
         private static List<_lastSpells> LastSpells = new List<_lastSpells>();
+        #endregion
 
         /// <summary>
         /// Initializes Prediction Services
