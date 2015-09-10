@@ -38,7 +38,7 @@ namespace SPrediction
         public static Dictionary<int, EnemyData> EnemyInfo = new Dictionary<int, EnemyData>();
         private static bool blInitialized;
         private static Menu predMenu;
-        public static SPrediction.Collision Collision;
+        private static SPrediction.Collision Collision;
 
         #region stuff for prediction drawings
         private static string lastDrawHitchance;
